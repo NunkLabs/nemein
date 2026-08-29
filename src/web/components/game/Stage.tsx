@@ -270,6 +270,8 @@ export default function StageWrapper() {
   );
 
   return (
+    /* Forces board to properly wait for Play */
+    gameLoadStates.gameRequest &&
     gameLoadStates.gameSocket && (
       <>
         <m.div

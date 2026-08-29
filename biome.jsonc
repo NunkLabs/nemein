@@ -52,15 +52,6 @@
       }
     },
     {
-      // Biome types useRef holders as permanently null and flags the real runtime guards around them.
-      "includes": ["src/web/App.tsx"],
-      "linter": {
-        "rules": {
-          "suspicious": { "noUnnecessaryConditions": { "level": "off" } }
-        }
-      }
-    },
-    {
       // Board, hold, queue and loading-letter lists are fixed positional grids: the index IS the identity.
       "includes": [
         "src/web/components/game/Stage.tsx",

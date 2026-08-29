@@ -2,14 +2,7 @@ import type { FeatureBundle } from "framer-motion";
 import { LazyMotion } from "framer-motion";
 import { GameSocket, Opcodes } from "libs/Socket";
 import { useGameStore } from "libs/Store";
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 
 const ControlPanel = lazy(() => import("components/panels/Control"));
 const Stage = lazy(() => import("components/game/Stage"));
@@ -65,42 +58,39 @@ export default function Nemein() {
   const updateGameStates = useGameStore((state) => state.updateGameStates);
   const updateGameStatus = useGameStore((state) => state.updateGameStatus);
 
-  const gameSocket = useRef<GameSocket | null>(null);
-  const isActive = useRef<boolean>(false);
-
   const [featureBundle, setFeatureBundle] = useState<FeatureBundle | null>(
     null
   );
+  /* Held in state so callbacks see the socket the effect owns */
+  const [gameSocket, setGameSocket] = useState<GameSocket | null>(null);
 
   const startGame = useCallback(() => {
-    if (!gameSocket.current) {
+    if (!gameSocket) {
       return;
     }
 
-    gameSocket.current.send({
+    gameSocket.send({
       data: gameOptions.gameMode,
       op: Opcodes.SOCKET_READY,
     });
 
     updateGameStatus("ongoing");
-  }, [gameOptions.gameMode, updateGameStatus]);
+  }, [gameOptions.gameMode, gameSocket, updateGameStatus]);
 
   const toggleGame = useCallback(() => {
-    if (!gameSocket.current) {
+    if (!gameSocket) {
       return;
     }
 
-    isActive.current = !isActive.current;
-
-    gameSocket.current.send({
-      data: isActive.current,
+    gameSocket.send({
+      data: gameStatus !== "ongoing",
       op: Opcodes.GAME_TOGGLE,
     });
-  }, []);
+  }, [gameSocket, gameStatus]);
 
   const handleKeydown = useCallback(
     ({ key }: { key: string }) => {
-      if (!gameSocket.current || gameStatus === "initializing") {
+      if (!gameSocket || gameStatus === "initializing") {
         return;
       }
 
@@ -114,12 +104,12 @@ export default function Nemein() {
         return;
       }
 
-      gameSocket.current.send({
+      gameSocket.send({
         data: key,
         op: Opcodes.GAME_KEYDOWN,
       });
     },
-    [gameStatus, toggleGame]
+    [gameSocket, gameStatus, toggleGame]
   );
 
   useEffect(() => {
@@ -147,9 +137,9 @@ export default function Nemein() {
 
   useEffect(() => {
     /* Initializes and listens for socket events */
-    gameSocket.current = new GameSocket();
+    const socket = new GameSocket();
 
-    gameSocket.current
+    socket
       .on("progress", ({ percent }) => {
         if (percent < 100) {
           return;
@@ -163,8 +153,6 @@ export default function Nemein() {
             if (data !== gameOptions.gameMode) {
               throw new Error("Game mode mismatched!");
             }
-
-            isActive.current = true;
 
             updateGameStatus("ongoing");
 
@@ -183,8 +171,6 @@ export default function Nemein() {
             updateGameStates(data);
 
             if (data.gameOver) {
-              isActive.current = false;
-
               updateGameStatus("ending");
             }
 
@@ -192,7 +178,7 @@ export default function Nemein() {
           }
 
           case Opcodes.GAME_TOGGLE: {
-            updateGameStatus(isActive.current ? "ongoing" : "pausing");
+            updateGameStatus(data ? "ongoing" : "pausing");
 
             break;
           }
@@ -201,15 +187,13 @@ export default function Nemein() {
         }
       });
 
+    setGameSocket(socket);
+
     return () => {
       /* Cleans up socket on component unmount */
-      if (!gameSocket.current) {
-        return;
-      }
+      socket.removeAllListeners();
 
-      gameSocket.current.removeAllListeners();
-
-      gameSocket.current.destroy();
+      socket.destroy();
     };
   }, [
     gameOptions.gameMode,
