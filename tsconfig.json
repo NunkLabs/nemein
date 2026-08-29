@@ -9,9 +9,10 @@
     "skipLibCheck": true,
     "removeComments": true,
 
-    "outDir": "./dist"
+    "outDir": "./dist/server"
   },
   "include": ["src"],
+  "exclude": ["src/web"],
   "ts-node": {
     "esm": true
   }

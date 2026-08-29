@@ -1,50 +1,60 @@
 # TetriBASS Server
 
-## Getting started
+This repository contains the game server and web client in one unified setup. The web client previously lived in [NunkLabs/nemein-client](https://github.com/NunkLabs/nemein-client); it now lives in `src/web` and shares this repository's package management, build, and deployment workflow.
 
-Previously, this project recommended using `nvm` & `yarn`. However, this approach results in some minor but annoying issues during deployment. We now use [pnpm](https://pnpm.io/installation) to manage the Node.js environment and its packages. This [nvm uninstall guide](https://www.linode.com/docs/guides/how-to-install-use-node-version-manager-nvm/#nvm-uninstall-steps) might be helpful if you want to make the switch.
+## Requirements
 
-The latest LTS version of Node.js is recommended.
+- Node.js 18 or newer
+- [pnpm](https://pnpm.io/installation)
 
-```
-pnpm env use --global lts
-```
+## Development
 
-**To install**
+Install dependencies:
 
-```
+```bash
 pnpm install
 ```
 
-**Build & start in development mode**
+Start the server and Vite development server:
 
-```
+```bash
 pnpm dev
 ```
 
-**Build & start in production mode**
+Open `http://localhost:3000`. Vite proxies WebSocket requests at `/ws` to the game server on `http://localhost:8080`.
 
-```
+## Production
+
+Build the server and web client, then start the server:
+
+```bash
 pnpm start
 ```
 
-**Coding standards**
+One Node.js process listens on `http://localhost:8080`. It serves the built client from `dist/web` and handles WebSocket upgrades at `/ws`.
 
-This project uses [ESLint](https://eslint.org/) & [Prettier](https://prettier.io/) to ensure proper JavaScript/TypeScript coding style and readability. We are currently using the Airbnb TypeScript ESLint config as the base config. Make sure to have ESLint set up in your development environment, see [Getting Started with ESLint](https://eslint.org/docs/user-guide/getting-started).
+Run checks:
 
-## Basic project structure
-
+```bash
+pnpm lint
+pnpm build
 ```
-Server
-├── dist // Server compiled output
+
+## Project structure
+
+```text
+.
+├── dist
+│   ├── server       # Compiled server
+│   └── web          # Built web client
 ├── src
-│   ├── core
-│   │   ├─ classic
-│   │   └─ nemein
+│   ├── core         # Game logic
 │   ├── utils
+│   ├── web          # React and Vite client
 │   ├── websocket
-│   └── index.ts
+│   ├── index.ts     # Server entry point
+│   └── server.ts    # HTTP and WebSocket server
 └── test
-    ├─ classic
-    └─ nemein
+    ├── classic
+    └── nemein
 ```

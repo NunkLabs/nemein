@@ -1,36 +1,26 @@
+import { fileURLToPath } from "node:url";
 import * as dotenv from "dotenv";
-import { nanoid } from "nanoid";
 
-import { SocketServer } from "./websocket/Server.js";
-import { Socket } from "./websocket/Socket.js";
+import { createServer } from "./server.js";
 import logger from "./utils/Logger.js";
 
 dotenv.config();
 
-const server = new SocketServer({ port: process.env.PORT || 8080 });
+const PORT = Number(process.env.PORT) || 8080;
+const isDev = process.env.NODE_ENV === "development";
+const defaultWebRoot = fileURLToPath(new URL("../web", import.meta.url));
+const webRoot = isDev ? undefined : defaultWebRoot;
 
-server.on("connection", (socket) => {
-  const id = nanoid();
+let server;
+try {
+  server = createServer({ webRoot });
+} catch (error) {
+  logger.error(`Failed to initialize server: ${(error as Error).message}`);
+  throw error;
+}
 
-  const gameSocket = new Socket(id, socket);
-
-  server.sockets.set(id, gameSocket);
-
-  socket
-    .on("error", (err) => {
-      logger.error(err.stack);
-
-      gameSocket.destroy();
-
-      server.sockets.delete(id);
-    })
-    .on("close", () => {
-      logger.info(`[Socket]: Connection ended with client (ID: ${id})`);
-
-      gameSocket.destroy();
-
-      server.sockets.delete(id);
-    });
-
-  logger.info(`[Socket]: Connection established with client (ID: ${id})`);
+server.listen(PORT, () => {
+  logger.info(
+    `[Server]: Listening on port ${PORT} (mode: ${isDev ? "development" : "production"})`,
+  );
 });

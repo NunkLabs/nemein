@@ -9,6 +9,8 @@ const SWEEP_INTERVAL = 60000;
 export class SocketServer extends WebSocketServer {
   sockets: Map<string, Socket>;
 
+  private sweepTimer: NodeJS.Timeout | null = null;
+
   constructor(options = {}) {
     super(options);
 
@@ -19,7 +21,7 @@ export class SocketServer extends WebSocketServer {
 
   init() {
     /* Sweeps sockets after they become inactive for too long */
-    setInterval(() => {
+    this.sweepTimer = setInterval(() => {
       const currentTimestamp = Date.now();
 
       this.sockets.forEach((socket) => {
@@ -34,6 +36,17 @@ export class SocketServer extends WebSocketServer {
         );
       });
     }, SWEEP_INTERVAL);
+
+    if (this.sweepTimer.unref) {
+      this.sweepTimer.unref();
+    }
+
+    this.on("close", () => {
+      if (this.sweepTimer) {
+        clearInterval(this.sweepTimer);
+        this.sweepTimer = null;
+      }
+    });
   }
 }
 
