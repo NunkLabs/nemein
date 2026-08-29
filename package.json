@@ -3,12 +3,34 @@
   "repository": "https://github.com/NunkuGemu/tetribass-server",
   "license": "MIT",
   "dependencies": {
+    "@fontsource-variable/montserrat": "^5.0.18",
+    "@pixi/react": "^7.1.2",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-switch": "^1.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "bufferutil": "^4.0.8",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
     "dotenv": "^16.4.5",
+    "eventemitter3": "^5.0.1",
+    "framer-motion": "^11.0.24",
     "nanoid": "^5.0.6",
+    "pixi.js": "^7.4.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sirv": "^3.0.0",
+    "tailwind-merge": "^2.2.2",
+    "tailwindcss-animate": "^1.0.7",
     "utf-8-validate": "^6.0.3",
     "winston": "^3.13.0",
-    "ws": "^8.16.0"
+    "ws": "^8.16.0",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.2.1",
@@ -16,9 +38,13 @@
     "@types/chai": "^4.3.14",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.12.3",
+    "@types/react": "^18.2.74",
+    "@types/react-dom": "^18.2.24",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
     "chai": "^5.1.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
@@ -32,28 +58,34 @@
     "mocha": "^10.4.0",
     "mocha-steps": "^1.3.0",
     "nodemon": "^3.1.0",
+    "postcss": "^8.4.38",
     "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.13",
+    "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.3",
+    "vite": "^5.2.8"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*.ts": [
+    "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
   },
   "scripts": {
+    "build": "rm -rf dist && tsc && tsc -p src/web/tsconfig.json && vite build --config src/web/vite.config.ts",
     "clean": "rm -rf dist node_modules",
-    "dev": "concurrently --kill-others \"tsc -w\" \"nodemon dist/index.js\"",
+    "dev": "concurrently --kill-others \"tsc -w\" \"NODE_ENV=development nodemon dist/server/index.js\" \"vite --config src/web/vite.config.ts\"",
     "format": "prettier --write src",
-    "lint": "eslint src --fix --ext .ts",
+    "lint": "eslint src --ext .ts,.tsx",
     "postinstall": "is-ci || husky install",
-    "start": "tsc && node dist/index.js",
+    "start": "pnpm build && node dist/server/index.js",
     "test": " ",
     "test:classic": "NODE_ENV=test mocha -r ts-node/register test/classic/*.ts"
   },
-  "type": "module"
+  "type": "module",
+  "packageManager": "pnpm@11.24.0"
 }
