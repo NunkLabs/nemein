@@ -76,7 +76,7 @@
     "dev": "concurrently --kill-others \"tsc -w\" \"NODE_ENV=development nodemon dist/server/index.js\" \"vite --config src/web/vite.config.ts\"",
     "format": "prettier --write src",
     "lint": "eslint src test vitest.config.ts --ext .ts,.tsx",
-    "postinstall": "is-ci || husky install",
+    "postinstall": "is-ci || husky",
     "start": "pnpm build && node dist/server/index.js",
     "test": "tsc -p tsconfig.test.json && vitest run"
   },
