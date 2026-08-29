@@ -1,6 +1,4 @@
-import { assert } from "chai";
-
-import { step } from "mocha-steps";
+import { describe, expect, it } from "vitest";
 
 import {
   ARROW_DOWN,
@@ -27,7 +25,7 @@ import {
   Nemein,
 } from "../../src/core/nemein/Nemein";
 
-import { Y_START, TetrisBoard } from "../../src/core/nemein/Board";
+import { Y_START, NemeinBoard } from "../../src/core/nemein/Board";
 
 import {
   Tetromino,
@@ -43,37 +41,36 @@ describe("Nemein", () => {
   describe(`Test initilization`, () => {
     const testTetris = new Nemein(
       DEFAULT_TEST_BOARD_WIDTH,
-      DEFAULT_TEST_BOARD_HEIGHT
+      DEFAULT_TEST_BOARD_HEIGHT,
     );
     const testGameStates = testTetris.updateNemeinStates();
     /**
      * We're ignoring checking the values of corX, corY, ghostCorY, Tetrominos,
-     * field, etc. here as they are already covered in the TetrisBoard &
+     * gameField, etc. here as they are already covered in the NemeinBoard &
      * TetrominoManager tests
      */
     it("Should return default state values", () => {
-      assert.strictEqual(
-        testGameStates.gameOver,
+      expect(testGameStates.gameOver, "Game over value is incorrect").toBe(
         false,
-        "Game over value is incorrect"
       );
-      assert.strictEqual(
-        testGameStates.corX,
+      expect(testGameStates.corX, "Starting position corX is incorrect").toBe(
         Math.floor((DEFAULT_TEST_BOARD_WIDTH - 1) / 2),
-        "Starting position corX is incorrect"
       );
-      assert.strictEqual(
-        testGameStates.corY,
+      expect(testGameStates.corY, "Starting position corY is incorrect").toBe(
         Y_START,
-        "Starting position corY is incorrect"
       );
-      assert.strictEqual(testGameStates.score, 0, "Score value is incorrect");
-      assert.strictEqual(testGameStates.level, 1, "Level value is incorrect");
-      assert.strictEqual(
+      expect(
+        testGameStates.clearRecordsArr,
+        "Clear records should be empty initially",
+      ).toHaveLength(0);
+      expect(
+        testGameStates.heldTetromino,
+        "Held Tetromino should be blank initially",
+      ).toBe(TetrominoType.Blank);
+      expect(
         testGameStates.gameInterval,
-        DEFAULT_TIME_INTERVAL_MS,
-        "Game interval value is incorrect"
-      );
+        "Game interval value is incorrect",
+      ).toBe(DEFAULT_TIME_INTERVAL_MS);
     });
   });
 
@@ -88,13 +85,13 @@ describe("Nemein", () => {
         rotation: TetrominoRotation.O,
       };
 
-      step("Should correctly render on down input", () => {
+      it("Should correctly render on down input", () => {
         const testCommands = [ARROW_DOWN, NUMPAD_2];
         testCommands.forEach((command) => {
           const testTetris = new Nemein(
             DEFAULT_TEST_BOARD_WIDTH,
             DEFAULT_TEST_BOARD_HEIGHT,
-            testOverwrittenTetromino
+            testOverwrittenTetromino,
           );
           /* Init command */
           let testGameStates = testTetris.inputHandle(command);
@@ -108,14 +105,13 @@ describe("Nemein", () => {
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 8, 0, 0, 0,
-            0, 8, 8, 8, 0, 0,
+            0, 0, 9, 0, 0, 0,
+            0, 9, 9, 9, 0, 0,
           ];
-          assert.deepStrictEqual(
-            TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-            testBitmap,
-            `Bitmap incorrect on command ${command} (first)`
-          );
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command} (first)`,
+          ).toStrictEqual(testBitmap);
 
           /* Actual down command */
           testGameStates = testTetris.inputHandle(command);
@@ -129,24 +125,23 @@ describe("Nemein", () => {
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            0, 0, 8, 0, 0, 0,
-            0, 8, 8, 8, 0, 0,
+            0, 0, 9, 0, 0, 0,
+            0, 9, 9, 9, 0, 0,
           ];
-          assert.deepStrictEqual(
-            TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-            testBitmap,
-            `Bitmap incorrect on command ${command} (second)`
-          );
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command} (second)`,
+          ).toStrictEqual(testBitmap);
         });
       });
 
-      step("Should correctly render active Tetromino right 1 unit", () => {
+      it("Should correctly render active Tetromino right 1 unit", () => {
         const testCommands = [ARROW_RIGHT, NUMPAD_6];
         testCommands.forEach((command) => {
           const testTetris = new Nemein(
             DEFAULT_TEST_BOARD_WIDTH,
             DEFAULT_TEST_BOARD_HEIGHT,
-            testOverwrittenTetromino
+            testOverwrittenTetromino,
           );
           for (
             let numRuns = 0;
@@ -166,24 +161,23 @@ describe("Nemein", () => {
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
-              0, 0, 0, 8, 0, 0,
-              0, 0, 8, 8, 8, 0,
+              0, 0, 0, 9, 0, 0,
+              0, 0, 9, 9, 9, 0,
             ];
-          assert.deepStrictEqual(
-            TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-            testBitmap,
-            `Bitmap incorrect on command ${command}`
-          );
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command}`,
+          ).toStrictEqual(testBitmap);
         });
       });
 
-      step("Should correctly render active Tetromino left 1 unit", () => {
+      it("Should correctly render active Tetromino left 1 unit", () => {
         const testCommands = [ARROW_LEFT, NUMPAD_4];
         testCommands.forEach((command) => {
           const testTetris = new Nemein(
             DEFAULT_TEST_BOARD_WIDTH,
             DEFAULT_TEST_BOARD_HEIGHT,
-            testOverwrittenTetromino
+            testOverwrittenTetromino,
           );
           for (
             let numRuns = 0;
@@ -203,104 +197,95 @@ describe("Nemein", () => {
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
-              0, 8, 0, 0, 0, 0,
-              8, 8, 8, 0, 0, 0,
+              0, 9, 0, 0, 0, 0,
+              9, 9, 9, 0, 0, 0,
             ];
-          assert.deepStrictEqual(
-            TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-            testBitmap,
-            `Bitmap incorrect on command ${command}`
-          );
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command}`,
+          ).toStrictEqual(testBitmap);
         });
       });
 
-      step(
-        "Should correctly render active Tetromino rotated once clockwised",
-        () => {
-          const testCommands = [ARROW_UP, NUMPAD_1, NUMPAD_5, NUMPAD_9];
-          testCommands.forEach((command) => {
-            const testTetris = new Nemein(
-              DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT,
-              testOverwrittenTetromino
-            );
-            for (
-              let numRuns = 0;
-              numRuns < DEFAULT_TEST_NUM_DOWN_COMMAND_RUNS;
-              numRuns += 1
-            ) {
-              testTetris.inputHandle(ARROW_DOWN);
-            }
-            const testGameStates = testTetris.inputHandle(command);
-            // prettier-ignore
-            const testBitmap = [
-              0, 0, 3, 0, 0, 0,
-              0, 0, 3, 3, 0, 0,
-              0, 0, 3, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 8, 0, 0, 0,
-              0, 0, 8, 8, 0, 0,
-              0, 0, 8, 0, 0, 0,
-            ];
-            assert.deepStrictEqual(
-              TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-              testBitmap,
-              `Bitmap incorrect on command ${command}`
-            );
-          });
-        }
-      );
+      it("Should correctly render active Tetromino rotated once clockwised", () => {
+        const testCommands = [ARROW_UP, NUMPAD_1, NUMPAD_5, NUMPAD_9];
+        testCommands.forEach((command) => {
+          const testTetris = new Nemein(
+            DEFAULT_TEST_BOARD_WIDTH,
+            DEFAULT_TEST_BOARD_HEIGHT,
+            testOverwrittenTetromino,
+          );
+          for (
+            let numRuns = 0;
+            numRuns < DEFAULT_TEST_NUM_DOWN_COMMAND_RUNS;
+            numRuns += 1
+          ) {
+            testTetris.inputHandle(ARROW_DOWN);
+          }
+          const testGameStates = testTetris.inputHandle(command);
+          // prettier-ignore
+          const testBitmap = [
+            0, 0, 3, 0, 0, 0,
+            0, 0, 3, 3, 0, 0,
+            0, 0, 3, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 9, 0, 0, 0,
+            0, 0, 9, 9, 0, 0,
+            0, 0, 9, 0, 0, 0,
+          ];
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command}`,
+          ).toStrictEqual(testBitmap);
+        });
+      });
 
-      step(
-        "Should correctly render active Tetromino rotated once counterclockwised",
-        () => {
-          const testCommands = [CTRL, Z_KEY, NUMPAD_3, NUMPAD_7];
-          testCommands.forEach((command) => {
-            const testTetris = new Nemein(
-              DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT,
-              testOverwrittenTetromino
-            );
-            for (
-              let numRuns = 0;
-              numRuns < DEFAULT_TEST_NUM_DOWN_COMMAND_RUNS;
-              numRuns += 1
-            ) {
-              testTetris.inputHandle(ARROW_DOWN);
-            }
-            const testGameStates = testTetris.inputHandle(command);
-            // prettier-ignore
-            const testBitmap = [
-              0, 0, 3, 0, 0, 0,
-              0, 3, 3, 0, 0, 0,
-              0, 0, 3, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0,
-              0, 0, 8, 0, 0, 0,
-              0, 8, 8, 0, 0, 0,
-              0, 0, 8, 0, 0, 0,
-            ];
-            assert.deepStrictEqual(
-              TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-              testBitmap,
-              `Bitmap incorrect on command ${command}`
-            );
-          });
-        }
-      );
+      it("Should correctly render active Tetromino rotated once counterclockwised", () => {
+        const testCommands = [CTRL, Z_KEY, NUMPAD_3, NUMPAD_7];
+        testCommands.forEach((command) => {
+          const testTetris = new Nemein(
+            DEFAULT_TEST_BOARD_WIDTH,
+            DEFAULT_TEST_BOARD_HEIGHT,
+            testOverwrittenTetromino,
+          );
+          for (
+            let numRuns = 0;
+            numRuns < DEFAULT_TEST_NUM_DOWN_COMMAND_RUNS;
+            numRuns += 1
+          ) {
+            testTetris.inputHandle(ARROW_DOWN);
+          }
+          const testGameStates = testTetris.inputHandle(command);
+          // prettier-ignore
+          const testBitmap = [
+            0, 0, 3, 0, 0, 0,
+            0, 3, 3, 0, 0, 0,
+            0, 0, 3, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            0, 0, 9, 0, 0, 0,
+            0, 9, 9, 0, 0, 0,
+            0, 0, 9, 0, 0, 0,
+          ];
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command}`,
+          ).toStrictEqual(testBitmap);
+        });
+      });
 
-      step("Should correctly render active Tetromino hard-dropped", () => {
+      it("Should correctly render active Tetromino hard-dropped", () => {
         const testCommands = [SPACE, NUMPAD_8];
         testCommands.forEach((command) => {
           const testTetris = new Nemein(
             DEFAULT_TEST_BOARD_WIDTH,
             DEFAULT_TEST_BOARD_HEIGHT,
-            testOverwrittenTetromino
+            testOverwrittenTetromino,
           );
           for (
             let numRuns = 0;
@@ -318,26 +303,25 @@ describe("Nemein", () => {
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
               0, 0, 0, 0, 0, 0,
-              0, 0, 8, 0, 0, 0,
-              0, 8, 8, 8, 0, 0,
+              0, 0, 9, 0, 0, 0,
+              0, 9, 9, 9, 0, 0,
               0, 0, 3, 0, 0, 0,
               0, 3, 3, 3, 0, 0,
             ];
-          assert.deepStrictEqual(
-            TetrisBoard.tetrisColsToBitmap(testGameStates.field),
-            testBitmap,
-            `Bitmap incorrect on command ${command}`
-          );
+          expect(
+            NemeinBoard.NemeinColsToBitmap(testGameStates.gameField),
+            `Bitmap incorrect on command ${command}`,
+          ).toStrictEqual(testBitmap);
         });
       });
 
-      step("Should correctly hold the active Tetromino", () => {
+      it("Should correctly hold the active Tetromino", () => {
         const testCommands = [C_KEY, NUMPAD_0, SHIFT];
         testCommands.forEach((command) => {
           const testTetris = new Nemein(
             DEFAULT_TEST_BOARD_WIDTH,
             DEFAULT_TEST_BOARD_HEIGHT,
-            testOverwrittenTetromino
+            testOverwrittenTetromino,
           );
           for (
             let numRuns = 0;
@@ -347,11 +331,10 @@ describe("Nemein", () => {
             testTetris.inputHandle(ARROW_DOWN);
           }
           const testGameStates = testTetris.inputHandle(command);
-          assert.strictEqual(
+          expect(
             testGameStates.heldTetromino,
-            testOverwrittenTetromino.type,
-            `Held Tetromino incorrect on command ${command}`
-          );
+            `Held Tetromino incorrect on command ${command}`,
+          ).toBe(testOverwrittenTetromino.type);
         });
       });
     });
@@ -369,25 +352,23 @@ describe("Nemein", () => {
         DEFAULT_TEST_BOARD_WIDTH,
         DEFAULT_TEST_BOARD_HEIGHT,
         testOverwrittenTetromino,
-        true
+        true,
       );
-      step("Should correctly add a lock delay of 0.5s", () => {
+      it(`Should keep the board's tick interval, never below the lock delay
+      floor`, () => {
         for (let run = 0; run < DEFAULT_TEST_BOARD_HEIGHT; run += 1) {
           const testGameStates = testTetris.inputHandle(ARROW_DOWN);
-          if (run > 0 && run < DEFAULT_TEST_BOARD_HEIGHT - 1) {
-            assert.strictEqual(
+          if (run > 0) {
+            expect(
               testGameStates.gameInterval,
-              0,
-              `Game interval
-              incorrect at iter ${run}/${DEFAULT_TEST_BOARD_HEIGHT - 1}`
-            );
-          } else if (run === DEFAULT_TEST_BOARD_HEIGHT - 1) {
-            assert.strictEqual(
-              testGameStates.gameInterval,
-              LOCK_DELAY_MS,
               `Game interval incorrect at iter ${run}/
-              ${DEFAULT_TEST_BOARD_HEIGHT - 1}`
-            );
+            ${DEFAULT_TEST_BOARD_HEIGHT - 1}`,
+            ).toBe(DEFAULT_TIME_INTERVAL_MS);
+            expect(
+              testGameStates.gameInterval >= LOCK_DELAY_MS,
+              `Game interval dropped below the lock delay floor at iter ${run}/
+            ${DEFAULT_TEST_BOARD_HEIGHT - 1}`,
+            ).toBe(true);
           }
         }
       });

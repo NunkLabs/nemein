@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_BOARD_WIDTH,
@@ -25,32 +25,28 @@ describe("TetrisBoard", () => {
       const testField: TetrisCol[] = testBoard.getField();
 
       it("Should return a playfield with correct DEFAULT_BOARD_WIDTH", () => {
-        assert.lengthOf(
-          testField,
+        expect(testField, `Width is not ${DEFAULT_BOARD_WIDTH}`).toHaveLength(
           DEFAULT_BOARD_WIDTH,
-          `Width is not ${DEFAULT_BOARD_WIDTH}`
         );
       });
 
       it("Should return a playfield with correct DEFAULT_BOARD_HEIGHT", () => {
         for (let x = 0; x < DEFAULT_BOARD_WIDTH; x += 1) {
-          assert.lengthOf(
+          expect(
             testField[x].colArr,
-            DEFAULT_BOARD_HEIGHT,
-            `Col ${x}'s length is not ${DEFAULT_BOARD_HEIGHT}`
-          );
+            `Col ${x}'s length is not ${DEFAULT_BOARD_HEIGHT}`,
+          ).toHaveLength(DEFAULT_BOARD_HEIGHT);
         }
       });
 
       it(`Should return a playfield with correct lowest y values for each
       column`, () => {
         for (let x = 0; x < DEFAULT_BOARD_WIDTH; x += 1) {
-          assert.strictEqual(
+          expect(
             testField[x].lowestY,
-            DEFAULT_BOARD_HEIGHT - 1,
             `Col[${x}] does not have lowest y value of
-            ${DEFAULT_BOARD_HEIGHT - 1}`
-          );
+          ${DEFAULT_BOARD_HEIGHT - 1}`,
+          ).toBe(DEFAULT_BOARD_HEIGHT - 1);
         }
       });
 
@@ -58,10 +54,8 @@ describe("TetrisBoard", () => {
         for (let x = 0; x < DEFAULT_BOARD_WIDTH; x += 1) {
           const col = testField[x].colArr;
           for (let y = 0; y < DEFAULT_BOARD_HEIGHT; y += 1) {
-            assert.strictEqual(
-              col[y],
+            expect(col[y], `Pixel ${x} on row ${y} is not blank`).toBe(
               TetrominoType.Blank,
-              `Pixel ${x} on row ${y} is not blank`
             );
           }
         }
@@ -71,37 +65,34 @@ describe("TetrisBoard", () => {
     describe("With input arguments", () => {
       const testBoard = new TetrisBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       const testField = testBoard.getField();
 
       it("Should return a playfield with correct input board width", () => {
-        assert.lengthOf(
+        expect(
           testField,
-          DEFAULT_TEST_BOARD_WIDTH,
-          `Width is not ${DEFAULT_TEST_BOARD_WIDTH}`
-        );
+          `Width is not ${DEFAULT_TEST_BOARD_WIDTH}`,
+        ).toHaveLength(DEFAULT_TEST_BOARD_WIDTH);
       });
 
       it("Should return a playfield with correct input board height", () => {
         for (let x = 0; x < DEFAULT_TEST_BOARD_WIDTH; x += 1) {
-          assert.lengthOf(
+          expect(
             testField[x].colArr,
-            DEFAULT_TEST_BOARD_HEIGHT,
-            `Col ${x}'s length is not ${DEFAULT_TEST_BOARD_HEIGHT}`
-          );
+            `Col ${x}'s length is not ${DEFAULT_TEST_BOARD_HEIGHT}`,
+          ).toHaveLength(DEFAULT_TEST_BOARD_HEIGHT);
         }
       });
 
       it(`Should return a playfield with correct lowest y values for each
       column`, () => {
         for (let x = 0; x < DEFAULT_TEST_BOARD_WIDTH; x += 1) {
-          assert.strictEqual(
+          expect(
             testField[x].lowestY,
-            DEFAULT_TEST_BOARD_HEIGHT - 1,
             `Col[${x}] does not have lowest y value of 
-            ${DEFAULT_TEST_BOARD_HEIGHT - 1}`
-          );
+          ${DEFAULT_TEST_BOARD_HEIGHT - 1}`,
+          ).toBe(DEFAULT_TEST_BOARD_HEIGHT - 1);
         }
       });
 
@@ -109,10 +100,8 @@ describe("TetrisBoard", () => {
         for (let x = 0; x < DEFAULT_TEST_BOARD_WIDTH; x += 1) {
           const col = testField[x].colArr;
           for (let y = 0; y < DEFAULT_TEST_BOARD_HEIGHT; y += 1) {
-            assert.strictEqual(
-              col[y],
+            expect(col[y], `Pixel ${x} on row ${y} is not blank`).toBe(
               TetrominoType.Blank,
-              `Pixel ${x} on row ${y} is not blank`
             );
           }
         }
@@ -124,7 +113,7 @@ describe("TetrisBoard", () => {
     describe("Test clearing lines", () => {
       const testBoard = new TetrisBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       // prettier-ignore
       const testBitmap = [
@@ -143,16 +132,15 @@ describe("TetrisBoard", () => {
       const fieldToUpdate = TetrisBoard.bitmapToTetrisCols(
         testBitmap,
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       testBoard.setField(fieldToUpdate);
 
       it("Should return the correct number of cleared lines", () => {
-        assert.strictEqual(
+        expect(
           testBoard.clearLines(),
-          DEFAULT_TEST_NUM_CLEAR_LINES,
-          `Number of cleared lines is not ${DEFAULT_TEST_NUM_CLEAR_LINES}`
-        );
+          `Number of cleared lines is not ${DEFAULT_TEST_NUM_CLEAR_LINES}`,
+        ).toBe(DEFAULT_TEST_NUM_CLEAR_LINES);
       });
     });
 
@@ -169,7 +157,7 @@ describe("TetrisBoard", () => {
        */
       const testBoard = new TetrisBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
       const testCorY = DEFAULT_TEST_BOARD_HEIGHT / 2;
@@ -177,25 +165,22 @@ describe("TetrisBoard", () => {
         testCorX,
         testCorY,
         DEFAULT_TEST_TETROMINO_TYPE,
-        DEFAULT_TEST_TETROMINO_ROTATION
+        DEFAULT_TEST_TETROMINO_ROTATION,
       );
       const testField = testBoard.getField();
       it("Should update the correct lowest y values", () => {
-        assert.strictEqual(
+        expect(
           testField[testCorX].lowestY,
-          testCorY - 1,
-          `Middle lowest y value is not ${testCorY - 1}`
-        );
-        assert.strictEqual(
+          `Middle lowest y value is not ${testCorY - 1}`,
+        ).toBe(testCorY - 1);
+        expect(
           testField[testCorX - 1].lowestY,
-          testCorY,
-          `Left lowest y value is not ${testCorY}`
-        );
-        assert.strictEqual(
+          `Left lowest y value is not ${testCorY}`,
+        ).toBe(testCorY);
+        expect(
           testField[testCorX + 1].lowestY,
-          testCorY,
-          `Right lowest y value is not ${testCorY}`
-        );
+          `Right lowest y value is not ${testCorY}`,
+        ).toBe(testCorY);
       });
     });
 
@@ -207,7 +192,7 @@ describe("TetrisBoard", () => {
       describe("Test rendering newly spawned Tetromino", () => {
         const testBoard = new TetrisBoard(
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT
+          DEFAULT_TEST_BOARD_HEIGHT,
         );
         const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
         const testCorY = 0;
@@ -229,13 +214,11 @@ describe("TetrisBoard", () => {
           testCorY,
           DEFAULT_TEST_TETROMINO_TYPE,
           DEFAULT_TEST_TETROMINO_ROTATION,
-          DEFAULT_TEST_TETROMINO_TYPE
+          DEFAULT_TEST_TETROMINO_TYPE,
         );
         it("Should render correctly", () => {
-          assert.deepStrictEqual(
-            testBitmap,
+          expect(testBitmap, "Returned bitmap is incorrect").toStrictEqual(
             TetrisBoard.tetrisColsToBitmap(testBoard.getField()),
-            "Returned bitmap is incorrect"
           );
         });
       });
@@ -243,7 +226,7 @@ describe("TetrisBoard", () => {
       describe("Test rendering Tetromino on blocked movement", () => {
         const testBoard = new TetrisBoard(
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT
+          DEFAULT_TEST_BOARD_HEIGHT,
         );
         const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
         const testCorY = DEFAULT_TEST_BOARD_HEIGHT - 1;
@@ -265,13 +248,11 @@ describe("TetrisBoard", () => {
           testCorY,
           DEFAULT_TEST_TETROMINO_TYPE,
           DEFAULT_TEST_TETROMINO_ROTATION,
-          DEFAULT_TEST_TETROMINO_TYPE
+          DEFAULT_TEST_TETROMINO_TYPE,
         );
         it("Should render correctly", () => {
-          assert.deepStrictEqual(
-            testBitmap,
+          expect(testBitmap, "Returned bitmap is incorrect").toStrictEqual(
             TetrisBoard.tetrisColsToBitmap(testBoard.getField()),
-            "Returned bitmap is incorrect"
           );
         });
       });
@@ -286,29 +267,28 @@ describe("TetrisBoard", () => {
         describe("Test renderable", () => {
           const testBoard = new TetrisBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT
+            DEFAULT_TEST_BOARD_HEIGHT,
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = 0;
           it("Should be able to render", () => {
-            assert.strictEqual(
-              true,
+            expect(
               testBoard.isTetrominoRenderable(
                 true,
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION
+                DEFAULT_TEST_TETROMINO_ROTATION,
               ),
-              "The Tetromino returned non-renderable"
-            );
+              "The Tetromino returned non-renderable",
+            ).toBe(true);
           });
         });
 
         describe("Test non-renderable", () => {
           const testBoard = new TetrisBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT
+            DEFAULT_TEST_BOARD_HEIGHT,
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = 0;
@@ -329,21 +309,20 @@ describe("TetrisBoard", () => {
             TetrisBoard.bitmapToTetrisCols(
               testBitmap,
               DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT
-            )
+              DEFAULT_TEST_BOARD_HEIGHT,
+            ),
           );
           it("Should not be able to render", () => {
-            assert.strictEqual(
-              false,
+            expect(
               testBoard.isTetrominoRenderable(
                 true,
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION
+                DEFAULT_TEST_TETROMINO_ROTATION,
               ),
-              "The Tetromino returned renderable"
-            );
+              "The Tetromino returned renderable",
+            ).toBe(false);
           });
         });
       });
@@ -352,7 +331,7 @@ describe("TetrisBoard", () => {
         describe("Test renderable", () => {
           const testBoard = new TetrisBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT
+            DEFAULT_TEST_BOARD_HEIGHT,
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           /**
@@ -361,24 +340,23 @@ describe("TetrisBoard", () => {
            */
           const testCorY = DEFAULT_TEST_BOARD_HEIGHT / 2;
           it("Should be able to render", () => {
-            assert.strictEqual(
-              true,
+            expect(
               testBoard.isTetrominoRenderable(
                 false,
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION
+                DEFAULT_TEST_TETROMINO_ROTATION,
               ),
-              "The Tetromino returned non-renderable"
-            );
+              "The Tetromino returned non-renderable",
+            ).toBe(true);
           });
         });
 
         describe("Test non-renderable", () => {
           const testBoard = new TetrisBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT
+            DEFAULT_TEST_BOARD_HEIGHT,
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = DEFAULT_TEST_BOARD_HEIGHT / 2;
@@ -399,21 +377,20 @@ describe("TetrisBoard", () => {
             TetrisBoard.bitmapToTetrisCols(
               testBitmap,
               DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT
-            )
+              DEFAULT_TEST_BOARD_HEIGHT,
+            ),
           );
           it("Should not be able to render", () => {
-            assert.strictEqual(
-              false,
+            expect(
               testBoard.isTetrominoRenderable(
                 true,
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION
+                DEFAULT_TEST_TETROMINO_ROTATION,
               ),
-              "The Tetromino returned renderable"
-            );
+              "The Tetromino returned renderable",
+            ).toBe(false);
           });
         });
       });
@@ -426,7 +403,7 @@ describe("TetrisBoard", () => {
        */
       const testBoard = new TetrisBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
       const testCorY = 0;
@@ -447,8 +424,8 @@ describe("TetrisBoard", () => {
         TetrisBoard.bitmapToTetrisCols(
           testBitmap,
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT
-        )
+          DEFAULT_TEST_BOARD_HEIGHT,
+        ),
       );
       it(`Should find the ghost y value that is dictated by the lowest y
         among the number of cols this tetromino spans`, () => {
@@ -457,15 +434,16 @@ describe("TetrisBoard", () => {
          * Tetromino. This test setup is arbitrarily created. We should find
          * another better way to extensively test this
          */
-        assert.strictEqual(
+        expect(
           DEFAULT_TEST_BOARD_HEIGHT / 2,
+          "Ghost y value found is incorrect",
+        ).toBe(
           testBoard.findGhostTetrominoY(
             testCorX,
             testCorY,
             DEFAULT_TEST_TETROMINO_TYPE,
-            DEFAULT_TEST_TETROMINO_ROTATION
+            DEFAULT_TEST_TETROMINO_ROTATION,
           ),
-          "Ghost y value found is incorrect"
         );
       });
     });
@@ -473,7 +451,7 @@ describe("TetrisBoard", () => {
     describe("Test ghost Tetromino coord's y value preparing", () => {
       const testBoard = new TetrisBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT
+        DEFAULT_TEST_BOARD_HEIGHT,
       );
       it(`Should find the ghost y value that is dictated by the lowest y
       among the number of cols this tetromino spans`, () => {
@@ -482,16 +460,16 @@ describe("TetrisBoard", () => {
           type < TetrominoType.NumTetrominoTypes;
           type += 1
         ) {
-          if (type !== TetrominoType.Ghost && type !== TetrominoType.Blank) {
+          /* Board guard admits Grey, but coords table has no Grey entry. */
+          if (type > TetrominoType.Blank && type < TetrominoType.Grey) {
             const prepGhostY = testBoard.prepareGhostTetrominoY(
               type,
-              DEFAULT_TEST_TETROMINO_ROTATION
+              DEFAULT_TEST_TETROMINO_ROTATION,
             );
-            assert.strictEqual(
+            expect(
               DEFAULT_TEST_BOARD_HEIGHT - 1,
-              prepGhostY,
-              "Ghost y value prepared is incorrect"
-            );
+              "Ghost y value prepared is incorrect",
+            ).toBe(prepGhostY);
           }
         }
       });

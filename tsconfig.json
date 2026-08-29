@@ -12,8 +12,5 @@
     "outDir": "./dist/server"
   },
   "include": ["src"],
-  "exclude": ["src/web"],
-  "ts-node": {
-    "esm": true
-  }
+  "exclude": ["src/web"]
 }

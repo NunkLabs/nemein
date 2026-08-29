@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import { describe, expect, it } from "vitest";
 
 import {
   MAX_SPAWNED_TETROMINOS,
@@ -21,36 +21,31 @@ describe("TetrominoManager", () => {
       testTetrominoManager.getSpawnedTetrominos(false);
     const testHeldTetromino = testTetrominoManager.getHeldTetromino();
     it("Should return a valid active Tetromino", () => {
-      assert.isTrue(
+      expect(
         testActiveTetromino.type !== TetrominoType.Blank &&
           testActiveTetromino.type !== TetrominoType.Ghost,
-        "Active Tetromino's type is invalid"
-      );
-      assert.strictEqual(
+        "Active Tetromino's type is invalid",
+      ).toBe(true);
+      expect(
         testActiveTetromino.rotation,
-        TetrominoRotation.O,
-        "Active Tetromino's rotation is invalid"
-      );
+        "Active Tetromino's rotation is invalid",
+      ).toBe(TetrominoRotation.O);
     });
     it(`Should return a spawned Tetrominos array of size MAX_SPAWNED_
       TETROMINOS`, () => {
-      assert.lengthOf(
+      expect(
         testSpawnedTetrominos,
-        MAX_SPAWNED_TETROMINOS,
-        "Spawned Tetrominos array does not have correct length"
-      );
+        "Spawned Tetrominos array does not have correct length",
+      ).toHaveLength(MAX_SPAWNED_TETROMINOS);
     });
     it(`Should return an empty held Tetromino`, () => {
-      assert.strictEqual(
-        testHeldTetromino.type,
+      expect(testHeldTetromino.type, "Held Tetromino's type is invalid").toBe(
         TetrominoType.Blank,
-        "Held Tetromino's type is invalid"
       );
-      assert.strictEqual(
+      expect(
         testHeldTetromino.rotation,
-        TetrominoRotation.O,
-        "Held Tetromino's rotation is invalid"
-      );
+        "Held Tetromino's rotation is invalid",
+      ).toBe(TetrominoRotation.O);
     });
   });
 
@@ -63,11 +58,10 @@ describe("TetrominoManager", () => {
       };
       testTetrominoManager.setActiveTetromino(testActiveTetrominoToSet);
       it("Should correctly set an active Tetromino", () => {
-        assert.deepStrictEqual(
+        expect(
           testTetrominoManager.getActiveTetromino(),
-          testActiveTetrominoToSet,
-          "Active Tetromino set is incorrect"
-        );
+          "Active Tetromino set is incorrect",
+        ).toStrictEqual(testActiveTetrominoToSet);
       });
     });
 
@@ -76,16 +70,15 @@ describe("TetrominoManager", () => {
       testTetrominoManager.swapHeldTetromino();
       const testHeldTetromino = testTetrominoManager.getHeldTetromino();
       it("Should correctly swap the held Tetromino", () => {
-        assert.isTrue(
+        expect(
           testHeldTetromino.type !== TetrominoType.Blank &&
             testHeldTetromino.type !== TetrominoType.Ghost,
-          "Held Tetromino is not correctly swapped"
-        );
-        assert.deepStrictEqual(
+          "Held Tetromino is not correctly swapped",
+        ).toBe(true);
+        expect(
           testHeldTetromino.rotation,
-          TetrominoRotation.O,
-          "Held Tetromino's rotation is not correctly set"
-        );
+          "Held Tetromino's rotation is not correctly set",
+        ).toStrictEqual(TetrominoRotation.O);
       });
     });
 
@@ -97,16 +90,14 @@ describe("TetrominoManager", () => {
       const testActiveTetromino = testTetrominoManager.getNewTetromino();
       it(`Should correctly get a new Tetromino and replace the current
         Active Tetromino`, () => {
-        assert.deepStrictEqual(
+        expect(
           testActiveTetromino,
-          testTetrominoToFetch,
-          "Active Tetromino differs from the Tetromino to fetch"
-        );
-        assert.strictEqual(
+          "Active Tetromino differs from the Tetromino to fetch",
+        ).toStrictEqual(testTetrominoToFetch);
+        expect(
           testTetrominoManager.getSpawnedTetrominos(false).length,
-          MAX_SPAWNED_TETROMINOS,
-          "Spawned Tetrominos length is not prevserved"
-        );
+          "Spawned Tetrominos length is not prevserved",
+        ).toBe(MAX_SPAWNED_TETROMINOS);
       });
     });
 
@@ -130,7 +121,7 @@ describe("TetrominoManager", () => {
               const offsets = TetrominoManager.getTetrominoWallKickOffsets(
                 type,
                 rotation,
-                direction
+                direction,
               );
               let cmpOffsets: number[][] = [];
               switch (type) {
@@ -140,10 +131,14 @@ describe("TetrominoManager", () => {
                   cmpOffsets = [[0, 0]];
                   break;
                 case TetrominoType.I:
-                  cmpOffsets = I_WALL_KICK_COR_OFFSETS[rotation][direction];
+                  cmpOffsets = I_WALL_KICK_COR_OFFSETS[rotation][direction].map(
+                    (offset) => [...offset],
+                  );
                   break;
                 case TetrominoType.T:
-                  cmpOffsets = JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction];
+                  cmpOffsets = JLSTZ_WALL_KICK_COR_OFFSETS[rotation][
+                    direction
+                  ].map((offset) => [...offset]);
                   if (rotation === TetrominoRotation.O) {
                     cmpOffsets.splice(WALL_KICK_IMPOSSIBLE_CASE_T_O_INDEX, 1);
                   } else if (rotation === TetrominoRotation.Z) {
@@ -157,19 +152,21 @@ describe("TetrominoManager", () => {
                 case TetrominoType.Z:
                 /* Fallthrough */
                 case TetrominoType.S:
-                  cmpOffsets = JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction];
+                case TetrominoType.Grey:
+                  cmpOffsets = JLSTZ_WALL_KICK_COR_OFFSETS[rotation][
+                    direction
+                  ].map((offset) => [...offset]);
                   break;
                 case TetrominoType.Ghost:
                   break;
                 default:
                   break;
               }
-              assert.deepStrictEqual(
+              expect(
                 offsets,
-                cmpOffsets,
                 `Offsets differ for Tetromino ${type}, rotation ${rotation},
-                direction ${direction}`
-              );
+              direction ${direction}`,
+              ).toStrictEqual(cmpOffsets);
             }
           }
         }
