@@ -1,17 +1,18 @@
+import type { Server } from "node:http";
 import { fileURLToPath } from "node:url";
-import * as dotenv from "dotenv";
+import { config } from "dotenv";
 
 import { createServer } from "./server.js";
 import logger from "./utils/Logger.js";
 
-dotenv.config();
+config();
 
 const PORT = Number(process.env.PORT) || 8080;
 const isDev = process.env.NODE_ENV === "development";
 const defaultWebRoot = fileURLToPath(new URL("../web", import.meta.url));
 const webRoot = isDev ? undefined : defaultWebRoot;
 
-let server;
+let server: Server;
 try {
   server = createServer({ webRoot });
 } catch (error) {
@@ -21,6 +22,6 @@ try {
 
 server.listen(PORT, () => {
   logger.info(
-    `[Server]: Listening on port ${PORT} (mode: ${isDev ? "development" : "production"})`,
+    `[Server]: Listening on port ${PORT} (mode: ${isDev ? "development" : "production"})`
   );
 });

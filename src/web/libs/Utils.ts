@@ -17,5 +17,5 @@ export function cn(...inputs: ClassValue[]) {
  * @return {number}         The random float rounded to the nearest hundredth
  */
 export function randomFloatInRange(min: number, max: number) {
-  return parseFloat((Math.random() * (max - min) + min).toFixed(2));
+  return Number.parseFloat((Math.random() * (max - min) + min).toFixed(2));
 }

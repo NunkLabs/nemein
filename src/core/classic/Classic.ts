@@ -1,23 +1,21 @@
+import logger from "../../utils/Logger.js";
 import {
-  Y_START,
-  DEFAULT_BOARD_WIDTH,
   DEFAULT_BOARD_HEIGHT,
+  DEFAULT_BOARD_WIDTH,
   TetrisBoard,
-  TetrisCol,
+  type TetrisCol,
+  Y_START,
 } from "./Board.js";
-
 import {
+  DEFAULT_TEST_OVERWRITTEN_TETROMINO,
+  type Tetromino,
+  TetrominoManager,
+  TetrominoRotateDirection,
+  TetrominoRotation,
+  TetrominoType,
   X_INDEX,
   Y_INDEX,
-  DEFAULT_TEST_OVERWRITTEN_TETROMINO,
-  TetrominoType,
-  TetrominoRotation,
-  TetrominoManager,
-  Tetromino,
-  TetrominoRotateDirection,
 } from "./TetrominoManager.js";
-
-import logger from "../../utils/Logger.js";
 
 /* Keyboard event consts */
 export const ARROW_DOWN = "ArrowDown";
@@ -55,13 +53,13 @@ export const VARIABLE_GOAL_MULTIPLIER = 10;
 
 /* Enum types */
 export enum ClassicCommand {
-  Left,
-  Right,
-  ClockwiseRotate,
-  CounterclockwiseRotate,
-  Down,
-  HardDrop,
-  HoldTetromino,
+  Left = 0,
+  Right = 1,
+  ClockwiseRotate = 2,
+  CounterclockwiseRotate = 3,
+  Down = 4,
+  HardDrop = 5,
+  HoldTetromino = 6,
 }
 export enum LineValue {
   None = 0,
@@ -71,26 +69,26 @@ export enum LineValue {
   Tetris = 4,
 }
 
-export type ClassicStates = {
-  type: "classic";
-  corX: number;
-  corY: number;
-  ghostCorY: number;
-  heldTetromino: TetrominoType;
+export interface ClassicStates {
   activeTetromino: TetrominoType;
   activeTetrominoRotate: TetrominoRotation;
-  spawnedTetrominos: TetrominoType[];
+  corX: number;
+  corY: number;
   gameField: TetrisCol[];
-  gameOver: boolean;
-  score: number;
-  level: number;
   gameInterval: number;
-};
+  gameOver: boolean;
+  ghostCorY: number;
+  heldTetromino: TetrominoType;
+  level: number;
+  score: number;
+  spawnedTetrominos: TetrominoType[];
+  type: "classic";
+}
 
 export class Classic {
-  private boardWidth: number;
+  private readonly boardWidth: number;
 
-  private board: TetrisBoard;
+  private readonly board: TetrisBoard;
 
   private onHold: boolean;
 
@@ -101,7 +99,7 @@ export class Classic {
 
   private ghostCorY: number;
 
-  private tetrominoManager: TetrominoManager;
+  private readonly tetrominoManager: TetrominoManager;
 
   private initRender: boolean;
 
@@ -129,7 +127,7 @@ export class Classic {
     boardHeight: number = DEFAULT_BOARD_HEIGHT,
     dbgOverwrittenTetromino: Tetromino = DEFAULT_TEST_OVERWRITTEN_TETROMINO,
     /* TBS-86: This is only for testing lock-delay */
-    dbgOverwriteTimer: boolean = false,
+    dbgOverwriteTimer = false
   ) {
     this.boardWidth = boardWidth;
     this.board = new TetrisBoard(boardWidth, boardHeight);
@@ -164,7 +162,7 @@ export class Classic {
     const activeTetromino = this.tetrominoManager.getActiveTetromino();
     this.ghostCorY = this.board.prepareGhostTetrominoY(
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
   }
 
@@ -174,7 +172,7 @@ export class Classic {
    * @param rotateDirection - Direction to rotate
    */
   private handleRotation(
-    rotateDirection: TetrominoRotateDirection = TetrominoRotateDirection.Clockwise,
+    rotateDirection: TetrominoRotateDirection = TetrominoRotateDirection.Clockwise
   ): void {
     const activeTetromino = this.tetrominoManager.getActiveTetromino();
 
@@ -196,14 +194,9 @@ export class Classic {
     const testOffsetArr = TetrominoManager.getTetrominoWallKickOffsets(
       activeTetromino.type,
       activeTetromino.rotation,
-      rotateDirection,
+      rotateDirection
     );
-    for (
-      let testOffsetIdx = 0;
-      testOffsetIdx < testOffsetArr.length;
-      testOffsetIdx += 1
-    ) {
-      const testOffset = testOffsetArr[testOffsetIdx];
+    for (const testOffset of testOffsetArr) {
       const testCorX = this.corX + testOffset[X_INDEX];
       const testCorY = this.corY + testOffset[Y_INDEX];
 
@@ -217,7 +210,7 @@ export class Classic {
           testCorX,
           testCorY,
           activeTetromino.type,
-          testRotate,
+          testRotate
         )
       ) {
         /**
@@ -237,14 +230,14 @@ export class Classic {
               this.corX + 1,
               this.corY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             ) ||
             this.board.isTetrominoRenderable(
               false,
               this.corX - 1,
               this.corY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             );
           this.isTspin = !isAbleToMoveHorizontally;
         }
@@ -253,8 +246,8 @@ export class Classic {
         this.corX = testCorX;
         this.corY = testCorY;
         const newActiveTetromino: Tetromino = {
-          type: activeTetromino.type,
           rotation: testRotate,
+          type: activeTetromino.type,
         };
         this.tetrominoManager.setActiveTetromino(newActiveTetromino);
         break;
@@ -272,7 +265,7 @@ export class Classic {
       this.corX,
       this.corY,
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
 
     /* Prepare new tetromino for the next board update */
@@ -283,7 +276,7 @@ export class Classic {
       this.corX,
       this.corY,
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
     this.onHold = false;
 
@@ -355,7 +348,7 @@ export class Classic {
         this.corX,
         this.corY,
         activeTetromino.type,
-        activeTetromino.rotation,
+        activeTetromino.rotation
       )
     ) {
       this.gameOver = true;
@@ -370,9 +363,7 @@ export class Classic {
    * we simply return the current game states without making any changes
    * @return: Updated game states
    */
-  public updateClassicStates(
-    command: ClassicCommand | null = null,
-  ): ClassicStates {
+  updateClassicStates(command: ClassicCommand | null = null): ClassicStates {
     let activeTetromino = this.tetrominoManager.getActiveTetromino();
     if (command !== null && !this.gameOver) {
       /* Handling init - We only render the newly spawned tetromino */
@@ -382,14 +373,14 @@ export class Classic {
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Ghost,
+          TetrominoType.Ghost
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          activeTetromino.type,
+          activeTetromino.type
         );
         this.initRender = false;
       } else {
@@ -402,14 +393,14 @@ export class Classic {
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Blank,
+          TetrominoType.Blank
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Blank,
+          TetrominoType.Blank
         );
 
         let yAddValid = true;
@@ -427,7 +418,7 @@ export class Classic {
                 testCorX,
                 this.corY,
                 activeTetromino.type,
-                activeTetromino.rotation,
+                activeTetromino.rotation
               )
             ) {
               this.corX = testCorX;
@@ -443,7 +434,7 @@ export class Classic {
                 testCorX,
                 this.corY,
                 activeTetromino.type,
-                activeTetromino.rotation,
+                activeTetromino.rotation
               )
             ) {
               this.corX = testCorX;
@@ -465,7 +456,7 @@ export class Classic {
               this.corX,
               testCorY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             );
             if (yAddValid) {
               /* If lock-delay was enabled, getting here means that the user
@@ -513,21 +504,21 @@ export class Classic {
           this.corX,
           this.corY,
           activeTetromino.type,
-          activeTetromino.rotation,
+          activeTetromino.rotation
         );
         this.board.renderTetromino(
           this.corX,
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Ghost,
+          TetrominoType.Ghost
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          activeTetromino.type,
+          activeTetromino.type
         );
 
         /**
@@ -567,25 +558,25 @@ export class Classic {
     }
 
     logger.debug(
-      `[Tetris] This tick's interval: ${this.gameInterval}ms (Level: ${this.level})`,
+      `[Tetris] This tick's interval: ${this.gameInterval}ms (Level: ${this.level})`
     );
 
     return {
-      type: "classic",
-      corX: this.corX,
-      corY: this.corY,
-      ghostCorY: this.ghostCorY,
-      heldTetromino: this.tetrominoManager.getHeldTetromino().type,
       activeTetromino: activeTetromino.type,
       activeTetrominoRotate: activeTetromino.rotation,
+      corX: this.corX,
+      corY: this.corY,
       gameField: this.board.getField(),
+      gameInterval: this.gameInterval,
+      gameOver: this.gameOver,
+      ghostCorY: this.ghostCorY,
+      heldTetromino: this.tetrominoManager.getHeldTetromino().type,
+      level: this.level,
+      score: this.score,
       spawnedTetrominos: <TetrominoType[]>(
         this.tetrominoManager.getSpawnedTetrominos(true)
       ),
-      gameOver: this.gameOver,
-      score: this.score,
-      level: this.level,
-      gameInterval: this.gameInterval,
+      type: "classic",
     };
   }
 
@@ -596,7 +587,7 @@ export class Classic {
    * @param: event - The keyboard event received
    * @return: Updated game states
    */
-  public inputHandle(key: string): ClassicStates {
+  inputHandle(key: string): ClassicStates {
     let retCommand: ClassicCommand = ClassicCommand.Down;
     switch (key) {
       case NUMPAD_4:
@@ -649,5 +640,3 @@ export class Classic {
     return this.updateClassicStates(retCommand);
   }
 }
-
-export default Classic;

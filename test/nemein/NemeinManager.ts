@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  MAX_SPAWNED_TETROMINOS,
-  JLSTZ_WALL_KICK_COR_OFFSETS,
   I_WALL_KICK_COR_OFFSETS,
-  WALL_KICK_IMPOSSIBLE_CASE_T_O_INDEX,
-  WALL_KICK_IMPOSSIBLE_CASE_T_Z_INDEX,
+  JLSTZ_WALL_KICK_COR_OFFSETS,
+  MAX_SPAWNED_TETROMINOS,
+  type Tetromino,
   TetrominoManager,
-  Tetromino,
+  TetrominoRotateDirection,
   TetrominoRotation,
   TetrominoType,
-  TetrominoRotateDirection,
+  WALL_KICK_IMPOSSIBLE_CASE_T_O_INDEX,
+  WALL_KICK_IMPOSSIBLE_CASE_T_Z_INDEX,
 } from "../../src/core/nemein/TetrominoManager";
 
 describe("TetrominoManager", () => {
@@ -24,27 +24,27 @@ describe("TetrominoManager", () => {
       expect(
         testActiveTetromino.type !== TetrominoType.Blank &&
           testActiveTetromino.type !== TetrominoType.Ghost,
-        "Active Tetromino's type is invalid",
+        "Active Tetromino's type is invalid"
       ).toBe(true);
       expect(
         testActiveTetromino.rotation,
-        "Active Tetromino's rotation is invalid",
+        "Active Tetromino's rotation is invalid"
       ).toBe(TetrominoRotation.O);
     });
     it(`Should return a spawned Tetrominos array of size MAX_SPAWNED_
       TETROMINOS`, () => {
       expect(
         testSpawnedTetrominos,
-        "Spawned Tetrominos array does not have correct length",
+        "Spawned Tetrominos array does not have correct length"
       ).toHaveLength(MAX_SPAWNED_TETROMINOS);
     });
-    it(`Should return an empty held Tetromino`, () => {
+    it("Should return an empty held Tetromino", () => {
       expect(testHeldTetromino.type, "Held Tetromino's type is invalid").toBe(
-        TetrominoType.Blank,
+        TetrominoType.Blank
       );
       expect(
         testHeldTetromino.rotation,
-        "Held Tetromino's rotation is invalid",
+        "Held Tetromino's rotation is invalid"
       ).toBe(TetrominoRotation.O);
     });
   });
@@ -53,14 +53,14 @@ describe("TetrominoManager", () => {
     describe("Test setting active Tetromino", () => {
       const testTetrominoManager = new TetrominoManager();
       const testActiveTetrominoToSet: Tetromino = {
-        type: TetrominoType.T,
         rotation: TetrominoRotation.R,
+        type: TetrominoType.T,
       };
       testTetrominoManager.setActiveTetromino(testActiveTetrominoToSet);
       it("Should correctly set an active Tetromino", () => {
         expect(
           testTetrominoManager.getActiveTetromino(),
-          "Active Tetromino set is incorrect",
+          "Active Tetromino set is incorrect"
         ).toStrictEqual(testActiveTetrominoToSet);
       });
     });
@@ -73,11 +73,11 @@ describe("TetrominoManager", () => {
         expect(
           testHeldTetromino.type !== TetrominoType.Blank &&
             testHeldTetromino.type !== TetrominoType.Ghost,
-          "Held Tetromino is not correctly swapped",
+          "Held Tetromino is not correctly swapped"
         ).toBe(true);
         expect(
           testHeldTetromino.rotation,
-          "Held Tetromino's rotation is not correctly set",
+          "Held Tetromino's rotation is not correctly set"
         ).toStrictEqual(TetrominoRotation.O);
       });
     });
@@ -92,17 +92,17 @@ describe("TetrominoManager", () => {
         Active Tetromino`, () => {
         expect(
           testActiveTetromino,
-          "Active Tetromino differs from the Tetromino to fetch",
+          "Active Tetromino differs from the Tetromino to fetch"
         ).toStrictEqual(testTetrominoToFetch);
         expect(
           testTetrominoManager.getSpawnedTetrominos(false).length,
-          "Spawned Tetrominos length is not prevserved",
+          "Spawned Tetrominos length is not prevserved"
         ).toBe(MAX_SPAWNED_TETROMINOS);
       });
     });
 
     describe("Test Tetrominos' wall kick offsets", () => {
-      it(`Should correctly get the wall kick offsets`, () => {
+      it("Should correctly get the wall kick offsets", () => {
         for (
           let type = TetrominoType.Blank;
           type < TetrominoType.NumTetrominoTypes;
@@ -121,7 +121,7 @@ describe("TetrominoManager", () => {
               const offsets = TetrominoManager.getTetrominoWallKickOffsets(
                 type,
                 rotation,
-                direction,
+                direction
               );
               let cmpOffsets: number[][] = [];
               switch (type) {
@@ -132,12 +132,12 @@ describe("TetrominoManager", () => {
                   break;
                 case TetrominoType.I:
                   cmpOffsets = structuredClone(
-                    I_WALL_KICK_COR_OFFSETS[rotation][direction],
+                    I_WALL_KICK_COR_OFFSETS[rotation][direction]
                   );
                   break;
                 case TetrominoType.T:
                   cmpOffsets = structuredClone(
-                    JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction],
+                    JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction]
                   );
                   if (rotation === TetrominoRotation.O) {
                     cmpOffsets.splice(WALL_KICK_IMPOSSIBLE_CASE_T_O_INDEX, 1);
@@ -155,7 +155,7 @@ describe("TetrominoManager", () => {
                 case TetrominoType.Grey:
                 case TetrominoType.Cleared:
                   cmpOffsets = structuredClone(
-                    JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction],
+                    JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction]
                   );
                   break;
                 case TetrominoType.Ghost:
@@ -166,7 +166,7 @@ describe("TetrominoManager", () => {
               expect(
                 offsets,
                 `Offsets differ for Tetromino ${type}, rotation ${rotation},
-              direction ${direction}`,
+              direction ${direction}`
               ).toStrictEqual(cmpOffsets);
             }
           }

@@ -1,4 +1,4 @@
-import { ChallengeLine, NemeinCol } from "./Board.js";
+import type { ChallengeLine, NemeinCol } from "./Board.js";
 import { DEFAULT_TIME_INTERVAL_MS } from "./Nemein.js";
 import { TetrominoType } from "./TetrominoManager.js";
 
@@ -40,106 +40,106 @@ export const DEFAULT_4_LINES_BASE_CHANCE_ACTIVATE_PERKS = 0.5;
 export const DEFAULT_CRIT_INCREASED_CHANCE_ACTIVATE_PERKS = 1.0;
 
 export enum CellStatus {
-  None,
-  Impaled,
-  Shocked,
-  Ignited,
-  Chilled,
-  Frozen,
+  None = 0,
+  Impaled = 1,
+  Shocked = 2,
+  Ignited = 3,
+  Chilled = 4,
+  Frozen = 5,
 }
 
 export enum DmgType {
-  Physical,
-  Fire,
-  Cold,
-  Lightning,
+  Physical = 0,
+  Fire = 1,
+  Cold = 2,
+  Lightning = 3,
 }
 
 export enum DamagingAilment {
-  Ignite,
+  Ignite = 0,
 }
 
 export enum NonDamagingAilment {
-  Chill,
-  Freeze,
-  Shock,
+  Chill = 0,
+  Freeze = 1,
+  Shock = 2,
 }
 
-export type PerksInfo = {
+export interface PerksInfo {
+  /* Cold */
+  chill: boolean;
+  freeze: boolean;
+  /* Fire */
+  ignite: boolean;
   /* Phys */
   impale: boolean;
   impaleExtraDmgPerCell: number;
   /* Lightning */
   shock: boolean;
   shockDmgMulti: number;
-  /* Fire */
-  ignite: boolean;
-  /* Cold */
-  chill: boolean;
-  freeze: boolean;
   /* TODO: Populate this later on with other types of ailments */
-};
+}
 
-export type DmgComposition = {
-  physical: number;
-  fire: number;
+export interface DmgComposition {
   cold: number;
+  fire: number;
   lightning: number;
+  physical: number;
   /* TODO: Populate this later on with other types of dmg */
-};
+}
 
-export type DefComposition = {
-  physReduc: number;
-  fireRes: number;
+export interface DefComposition {
   coldRes: number;
+  fireRes: number;
   lightningRes: number;
+  physReduc: number;
   /* TODO: Populate this later on with other types of def */
-};
+}
 
-export type LineClearInfo = {
+export interface LineClearInfo {
+  criticalHit: boolean;
   dmg: DmgComposition;
   lineIdx: number;
-  criticalHit: boolean;
-};
+}
 
-export type LineClearInfoPostMitigation = {
+export interface LineClearInfoPostMitigation {
   info: LineClearInfo;
   isLineCleared: boolean;
-};
+}
 
-export type DamagingAilmentInstance = {
+export interface DamagingAilmentInstance {
   dmgPerTick: number;
-  durationTicks: number;
   dmgType: DmgType;
-};
-
-export type NonDamagingAilmentInstance = {
-  effectiveness: number;
   durationTicks: number;
-};
+}
 
-export type AilmentReturnInfo = {
-  newGameIntervalMs: number;
+export interface NonDamagingAilmentInstance {
+  durationTicks: number;
+  effectiveness: number;
+}
+
+export interface AilmentReturnInfo {
   lineClearInfoArr: LineClearInfoPostMitigation[];
-};
+  newGameIntervalMs: number;
+}
 
 export class DmgManager {
-  private field: NemeinCol[];
+  private readonly field: NemeinCol[];
 
-  private boardWidth: number;
+  private readonly boardWidth: number;
 
-  private boardHeight: number;
+  private readonly boardHeight: number;
 
-  private challengeLine: ChallengeLine;
+  private readonly challengeLine: ChallengeLine;
 
-  private perksInfo: PerksInfo;
+  private readonly perksInfo: PerksInfo;
 
-  private damgingAilmentInstancesMap: Map<
+  private readonly damgingAilmentInstancesMap: Map<
     DamagingAilment,
     DamagingAilmentInstance[]
   >;
 
-  private nonDamagingAilmentInstancesMap: Map<
+  private readonly nonDamagingAilmentInstancesMap: Map<
     NonDamagingAilment,
     NonDamagingAilmentInstance[]
   >;
@@ -148,20 +148,20 @@ export class DmgManager {
     field: NemeinCol[],
     boardWidth: number,
     boardHeight: number,
-    challengeLine: ChallengeLine,
+    challengeLine: ChallengeLine
   ) {
     this.field = field;
     this.boardHeight = boardHeight;
     this.boardWidth = boardWidth;
     this.challengeLine = challengeLine;
     this.perksInfo = {
+      chill: false,
+      freeze: false,
+      ignite: false,
       impale: false,
       impaleExtraDmgPerCell: 0,
       shock: false,
       shockDmgMulti: DEFAULT_SHOCK_DAMAGE_MULTI,
-      ignite: false,
-      chill: false,
-      freeze: false,
     };
     this.damgingAilmentInstancesMap = new Map<
       DamagingAilment,
@@ -187,7 +187,7 @@ export class DmgManager {
    * @returns Array of objects - each containing information on the index
    * of the line to be cleared and the damage clearing the line provides
    */
-  public calculateDmgPool(): LineClearInfo[] {
+  calculateDmgPool(): LineClearInfo[] {
     const ret: LineClearInfo[] = [];
 
     /* Check for complete lines */
@@ -204,7 +204,8 @@ export class DmgManager {
         if (cellType < TetrominoType.Square || cellType > TetrominoType.Grey) {
           isLineComplete = false;
           break;
-        } else if (cellType < TetrominoType.Grey) {
+        }
+        if (cellType < TetrominoType.Grey) {
           numUserCells += 1;
         }
       }
@@ -218,14 +219,14 @@ export class DmgManager {
             ? DEFAULT_DMG_PER_LINE * DEFAULT_CRIT_DMG_MULTIPLIER
             : DEFAULT_DMG_PER_LINE) * this.perksInfo.shockDmgMulti;
         ret.push({
+          criticalHit: isLineValidForCrit,
           dmg: {
-            physical: lineDmgPool,
-            fire: 0,
             cold: 0,
+            fire: 0,
             lightning: 0 /* TODO: Handle more types of dmg */,
+            physical: lineDmgPool,
           },
           lineIdx: row,
-          criticalHit: isLineValidForCrit,
         });
       }
     }
@@ -243,9 +244,9 @@ export class DmgManager {
    * @returns object containing post-mitigation dmg pool + whether or not the
    * line is actually cleared
    */
-  public dealDmgToLine(
+  dealDmgToLine(
     info: LineClearInfo,
-    isHittingChallengeLine: boolean,
+    isHittingChallengeLine: boolean
   ): LineClearInfoPostMitigation {
     const ret: LineClearInfoPostMitigation = { info, isLineCleared: false };
     let numCellsCleared = 0;
@@ -254,10 +255,10 @@ export class DmgManager {
       : info.lineIdx;
 
     const dmgCompPerCell: DmgComposition = {
-      physical: Math.floor(info.dmg.physical / this.boardWidth),
-      fire: Math.floor(info.dmg.fire / this.boardWidth),
       cold: Math.floor(info.dmg.cold / this.boardWidth),
+      fire: Math.floor(info.dmg.fire / this.boardWidth),
       lightning: Math.floor(info.dmg.lightning / this.boardWidth),
+      physical: Math.floor(info.dmg.physical / this.boardWidth),
     };
 
     let totalPhysDmgDealt = 0;
@@ -306,10 +307,10 @@ export class DmgManager {
 
       if (isHittingChallengeLine) {
         ret.info.dmg = {
-          physical: totalPhysDmgDealt,
-          fire: totalFireDmgDealt,
           cold: totalColdDmgDealt,
+          fire: totalFireDmgDealt,
           lightning: totalLightningDmgDealt,
+          physical: totalPhysDmgDealt,
         };
       }
 
@@ -324,10 +325,10 @@ export class DmgManager {
    * @returns - Array of line clear info if multiple challange lines
    * are to be cleared in a single tick
    */
-  public procAilments(): AilmentReturnInfo {
+  procAilments(): AilmentReturnInfo {
     const ret: AilmentReturnInfo = {
-      newGameIntervalMs: DEFAULT_TIME_INTERVAL_MS,
       lineClearInfoArr: [],
+      newGameIntervalMs: DEFAULT_TIME_INTERVAL_MS,
     };
 
     ret.lineClearInfoArr = this.procDamagingAilments();
@@ -345,7 +346,7 @@ export class DmgManager {
    */
   private ailmentExpired(
     ailmentInstances: DamagingAilmentInstance[] | NonDamagingAilmentInstance[],
-    ailmentType: DamagingAilment | NonDamagingAilment,
+    ailmentType: DamagingAilment | NonDamagingAilment
   ): boolean {
     let ret = false;
     if (!ailmentInstances.length) {
@@ -387,15 +388,12 @@ export class DmgManager {
 
         let instanceInEffect: DamagingAilmentInstance = {
           dmgPerTick: 0,
-          durationTicks: 0,
           dmgType: DmgType.Physical,
+          durationTicks: 0,
         };
         for (let i = 0; i < value.length; i += 1) {
           const ailmentInstance = value[i];
-          if (!ailmentInstance.durationTicks) {
-            value.splice(i, 1);
-            i -= 1;
-          } else {
+          if (ailmentInstance.durationTicks) {
             ailmentInstance.durationTicks -= 1;
             switch (key) {
               /* Ignite picks the instance that rolls the highest dmg per tick */
@@ -407,32 +405,35 @@ export class DmgManager {
               default:
                 break;
             }
+          } else {
+            value.splice(i, 1);
+            i -= 1;
           }
         }
 
         const ailmentDmgInfo: DmgComposition = {
-          physical: 0,
-          fire:
-            instanceInEffect.dmgType === DmgType.Fire
-              ? instanceInEffect.dmgPerTick
-              : 0,
           cold:
             instanceInEffect.dmgType === DmgType.Cold
+              ? instanceInEffect.dmgPerTick
+              : 0,
+          fire:
+            instanceInEffect.dmgType === DmgType.Fire
               ? instanceInEffect.dmgPerTick
               : 0,
           lightning:
             instanceInEffect.dmgType === DmgType.Lightning
               ? instanceInEffect.dmgPerTick
               : 0,
+          physical: 0,
         };
         const clearInfo: LineClearInfoPostMitigation = this.dealDmgToLine(
-          { dmg: ailmentDmgInfo, lineIdx: 0, criticalHit: false },
-          true /* isHittingChallengeLine */,
+          { criticalHit: false, dmg: ailmentDmgInfo, lineIdx: 0 },
+          true /* isHittingChallengeLine */
         );
         if (clearInfo.isLineCleared) {
           ret.push(clearInfo);
         }
-      },
+      }
     );
 
     return ret;
@@ -453,10 +454,7 @@ export class DmgManager {
 
         for (let i = 0; i < value.length; i += 1) {
           const ailmentInstance = value[i];
-          if (!ailmentInstance.durationTicks) {
-            value.splice(i, 1);
-            i -= 1;
-          } else {
+          if (ailmentInstance.durationTicks) {
             ailmentInstance.durationTicks -= 1;
             switch (key) {
               case NonDamagingAilment.Chill:
@@ -481,9 +479,12 @@ export class DmgManager {
               default:
                 break;
             }
+          } else {
+            value.splice(i, 1);
+            i -= 1;
           }
         }
-      },
+      }
     );
 
     return ret;
@@ -537,7 +538,7 @@ export class DmgManager {
           this.handleImpale(
             totalPhysDmgPool,
             impaleRollChance,
-            numLinesCleared,
+            numLinesCleared
           );
         }
         const totalHpCleared =
@@ -564,7 +565,7 @@ export class DmgManager {
   private handleImpale(
     totalPhysDmgPool: number,
     impaleRollChance: number,
-    numLinesCleared: number,
+    numLinesCleared: number
   ) {
     if (Math.random() < impaleRollChance) {
       this.perksInfo.impale = true;
@@ -592,15 +593,15 @@ export class DmgManager {
     this.perksInfo.ignite = Math.random() < igniteRollChance;
     if (this.perksInfo.ignite) {
       const igniteInstancesArr = this.damgingAilmentInstancesMap.get(
-        DamagingAilment.Ignite,
+        DamagingAilment.Ignite
       );
       if (igniteInstancesArr) {
         igniteInstancesArr.push({
           dmgPerTick:
             (totalFireDmgPool * DEFAULT_IGNITE_HIT_PERC) /
             DEFAULT_DAMAGING_AILMENT_DURATION_TICKS,
-          durationTicks: DEFAULT_DAMAGING_AILMENT_DURATION_TICKS,
           dmgType: DmgType.Fire,
+          durationTicks: DEFAULT_DAMAGING_AILMENT_DURATION_TICKS,
         });
       }
     }
@@ -615,38 +616,38 @@ export class DmgManager {
   private handleChillFreeze(
     totalColdDmgPool: number,
     freezeRollChance: number,
-    totalHpCleared: number,
+    totalHpCleared: number
   ) {
     this.perksInfo.chill = true;
     const chillInstancesArr = this.nonDamagingAilmentInstancesMap.get(
-      NonDamagingAilment.Chill,
+      NonDamagingAilment.Chill
     );
     const chillEffectiveness = Math.min(
       (totalColdDmgPool / totalHpCleared) * DEFAULT_CHILL_EFFECTIVENESS_PERC,
-      DEFAULT_MAX_CHILL_EFFECTIVENESS,
+      DEFAULT_MAX_CHILL_EFFECTIVENESS
     );
     if (
       chillInstancesArr &&
       chillEffectiveness >= DEFAULT_MIN_CHILL_EFFECTIVENESS
     ) {
       chillInstancesArr.push({
-        effectiveness: chillEffectiveness,
         durationTicks: DEFAULT_CHILL_DURATION_TICKS,
+        effectiveness: chillEffectiveness,
       });
     }
 
     this.perksInfo.freeze = Math.random() < freezeRollChance;
     if (this.perksInfo.freeze) {
       const freezeInstancesArr = this.nonDamagingAilmentInstancesMap.get(
-        NonDamagingAilment.Freeze,
+        NonDamagingAilment.Freeze
       );
       const freezeEffectiveness =
         DEFAULT_FREEZE_BASE_EFFECTIVENESS +
         (totalColdDmgPool / totalHpCleared) * DEFAULT_FREEZE_EFFECTIVENESS_PERC;
       if (freezeInstancesArr) {
         freezeInstancesArr.push({
-          effectiveness: freezeEffectiveness,
           durationTicks: DEFAULT_FREEZE_DURATION_TICKS,
+          effectiveness: freezeEffectiveness,
         });
       }
     }
@@ -661,24 +662,22 @@ export class DmgManager {
   private handleShock(
     totalLightningDmgPool: number,
     shockRollChance: number,
-    totalHpCleared: number,
+    totalHpCleared: number
   ) {
     this.perksInfo.shock = Math.random() < shockRollChance;
     if (this.perksInfo.shock) {
       const shockInstancesArr = this.nonDamagingAilmentInstancesMap.get(
-        NonDamagingAilment.Shock,
+        NonDamagingAilment.Shock
       );
       const shockEffectiveness =
         (totalLightningDmgPool / totalHpCleared) *
         DEFAULT_SHOCK_EFFECTIVENESS_PERC;
       if (shockInstancesArr) {
         shockInstancesArr.push({
-          effectiveness: shockEffectiveness,
           durationTicks: DEFAULT_SHOCK_DURATION_TICKS,
+          effectiveness: shockEffectiveness,
         });
       }
     }
   }
 }
-
-export default DmgManager;

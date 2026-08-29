@@ -4,13 +4,13 @@ import { useGameStore } from "libs/Store";
 
 export default function PerformanceTracker() {
   const updateGamePerformance = useGameStore(
-    (state) => state.updateGamePerformance,
+    (state) => state.updateGamePerformance
   );
 
-  useTick((delta, ticker) => {
+  useTick((_delta, ticker) => {
     updateGamePerformance({
       frameRate: Math.floor(ticker.FPS),
-      frameTime: parseFloat(ticker.deltaMS.toFixed(2)),
+      frameTime: Number.parseFloat(ticker.deltaMS.toFixed(2)),
     });
   });
 

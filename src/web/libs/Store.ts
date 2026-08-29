@@ -1,73 +1,73 @@
 import { create } from "zustand";
 
 /* Load states typing */
-type GameLoadStates = {
-  initialLoad: boolean;
+interface GameLoadStates {
   featureBundle: boolean;
   gameRequest: boolean;
-  gameStage: boolean;
   gameSocket: boolean;
-};
+  gameStage: boolean;
+  initialLoad: boolean;
+}
 
 /* Game options typings */
-type GameOptions = {
-  gameMode: "classic" | "nemein";
+interface GameOptions {
   antialias: boolean;
-  powerPreference: "default" | "high-performance" | "low-power";
+  gameMode: "classic" | "nemein";
   performanceDisplay: boolean;
+  powerPreference: "default" | "high-performance" | "low-power";
   stageShake: boolean;
-};
+}
 
 /* Game performance typings */
-type GamePerformance = {
+interface GamePerformance {
   currentLatency: number;
   frameRate: number;
   frameTime: number;
-};
+}
 
 /* Tetromino enum types */
 export enum TetrominoType {
-  Blank,
-  Square,
-  I,
-  T,
-  J,
-  L,
-  Z,
-  S,
-  Grey,
-  Ghost,
+  Blank = 0,
+  Square = 1,
+  I = 2,
+  T = 3,
+  J = 4,
+  L = 5,
+  Z = 6,
+  S = 7,
+  Grey = 8,
+  Ghost = 9,
 }
 
 /* Classic game state typings */
-export type ClassicStates = {
-  type: "classic";
+export interface ClassicStates {
   gameField: {
     colArr: number[];
     lowestY: number;
   }[];
-};
+  type: "classic";
+}
 
 /* Nemein game state typings */
 export enum DmgType {
-  Physical,
-  Fire,
-  Cold,
-  Lightning,
+  Physical = 0,
+  Fire = 1,
+  Cold = 2,
+  Lightning = 3,
 }
 
-export type ClearRecord = {
-  idx: number;
-  lineTypeArr: TetrominoType[];
-  wasCrit: boolean;
+export interface ClearRecord {
   dmgDealt: {
     dominantDmgType: DmgType;
     value: number;
   };
-};
+  idx: number;
+  lineTypeArr: TetrominoType[];
+  wasCrit: boolean;
+}
 
-export type NemeinStates = {
-  type: "nemein";
+export interface NemeinStates {
+  clearRecordsArr: ClearRecord[];
   gameField: {
     colArr: {
       type: TetrominoType;
@@ -75,8 +75,8 @@ export type NemeinStates = {
     }[];
     lowestY: number;
   }[];
-  clearRecordsArr: ClearRecord[];
-};
+  type: "nemein";
+}
 
 /* Combined game state typings */
 export type GameStates = {
@@ -94,38 +94,38 @@ type GameStatus = "initializing" | "ongoing" | "pausing" | "ending";
 type GameTheme = "light" | "dark" | (string & {}) | undefined;
 
 /* Game store typings */
-type GameStoreState = {
+interface GameStoreState {
   gameLoadStates: GameLoadStates;
   gameOptions: GameOptions;
   gamePerformance: GamePerformance;
   gameStates: GameStates | null;
   gameStatus: GameStatus;
   gameTheme: GameTheme;
-};
+}
 
-type GameStoreAction = {
+interface GameStoreAction {
   updateGameLoadStates: (gameLoadStates: Partial<GameLoadStates>) => void;
   updateGameOptions: (gameOptions: Partial<GameOptions>) => void;
   updateGamePerformance: (gamePerformance: Partial<GamePerformance>) => void;
   updateGameStates: (gameStates: GameStates) => void;
   updateGameStatus: (gameStatus: GameStatus) => void;
   updateGameTheme: (gameTheme: GameTheme) => void;
-};
+}
 
 /* Builds the game store */
 export const useGameStore = create<GameStoreState & GameStoreAction>((set) => ({
   gameLoadStates: {
-    initialLoad: true,
     featureBundle: false,
     gameRequest: false,
-    gameStage: false,
     gameSocket: false,
+    gameStage: false,
+    initialLoad: true,
   },
   gameOptions: {
-    gameMode: "nemein",
     antialias: true,
-    powerPreference: "default",
+    gameMode: "nemein",
     performanceDisplay: import.meta.env.DEV,
+    powerPreference: "default",
     stageShake: true,
   },
   gamePerformance: {

@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useState } from "react";
+import { buttonVariants } from "components/ui/Button";
 import { AnimatePresence, m } from "framer-motion";
 
 import { useGameStore } from "libs/Store";
-import { buttonVariants } from "components/ui/Button";
+import { useCallback, useEffect, useState } from "react";
 
 export default function ControlPanel({
   startGame,
@@ -15,16 +15,20 @@ export default function ControlPanel({
 
   const [presence, setPresence] = useState<boolean>(false);
 
+  const handleExitComplete = useCallback(() => setPresence(false), []);
+
   useEffect(() => {
-    if (gameStatus !== "pausing" && gameStatus !== "ending") return;
+    if (gameStatus !== "pausing" && gameStatus !== "ending") {
+      return;
+    }
 
     setPresence(true);
   }, [gameStatus]);
 
   return (
     presence && (
-      <div className="fixed left-1/2 top-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col place-items-center gap-y-2 text-center">
-        <AnimatePresence onExitComplete={() => setPresence(false)}>
+      <div className="fixed top-1/2 left-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col place-items-center gap-y-2 text-center">
+        <AnimatePresence onExitComplete={handleExitComplete}>
           {(gameStatus === "pausing" || gameStatus === "ending") && (
             /**
              * The animation sequence here creates an vertical fold/unfold effect
@@ -37,57 +41,57 @@ export default function ControlPanel({
              * translate and the spring easing because the spring motion at the
              * end won't be visible anyway.
              */
-            <Fragment>
+            <>
               <m.h1
-                className="text-3xl"
-                key="control-panel-header"
-                initial={{ opacity: 0, y: -10 }}
                 animate={{
                   opacity: 1,
-                  y: 0,
                   transition: { type: "spring" },
+                  y: 0,
                 }}
+                className="text-3xl"
                 exit={{ opacity: 0, transition: { delay: 0.1 } }}
+                initial={{ opacity: 0, y: -10 }}
+                key="control-panel-header"
               >
                 {gameStatus === "ending" ? "Game Over" : "Paused"}
               </m.h1>
               <m.button
-                className={buttonVariants({ variant: "default" })}
-                key="control-panel-restart"
-                initial={{ opacity: 0, y: -10 }}
                 animate={{
                   opacity: 1,
-                  y: 0,
                   transition: { delay: 0.05, type: "spring" },
+                  y: 0,
                 }}
+                className={buttonVariants({ variant: "default" })}
                 exit={{ opacity: 0, transition: { delay: 0.05 } }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: -10 }}
+                key="control-panel-restart"
                 onClick={startGame}
                 type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Restart
               </m.button>
               {gameStatus === "pausing" && (
                 <m.button
-                  className={buttonVariants({ variant: "default" })}
-                  key="control-panel-resume"
-                  initial={{ opacity: 0, y: -10 }}
                   animate={{
                     opacity: 1,
-                    y: 0,
                     transition: { delay: 0.1, type: "spring" },
+                    y: 0,
                   }}
+                  className={buttonVariants({ variant: "default" })}
                   exit={{ opacity: 0 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  key="control-panel-resume"
                   onClick={toggleGame}
                   type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   Resume
                 </m.button>
               )}
-            </Fragment>
+            </>
           )}
         </AnimatePresence>
       </div>

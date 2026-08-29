@@ -2,6 +2,22 @@
   "name": "tetribass-server",
   "repository": "https://github.com/NunkuGemu/tetribass-server",
   "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "rm -rf dist && tsc && tsc -p src/web/tsconfig.json && vite build --config src/web/vite.config.ts",
+    "check": "ultracite check",
+    "clean": "rm -rf dist node_modules",
+    "dev": "concurrently --kill-others \"tsc -w\" \"NODE_ENV=development nodemon dist/server/index.js\" \"vite --config src/web/vite.config.ts\"",
+    "fix": "ultracite fix",
+    "postinstall": "is-ci || husky",
+    "start": "pnpm build && node dist/server/index.js",
+    "test": "tsc -p tsconfig.test.json && vitest run"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,md,html,svg}": [
+      "ultracite fix"
+    ]
+  },
   "dependencies": {
     "@fontsource-variable/montserrat": "^5.0.18",
     "@pixi/react": "^7.1.2",
@@ -33,53 +49,29 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.11",
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
     "@types/node": "^26.4.0",
     "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.24",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
     "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.19",
     "concurrently": "^8.2.2",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
     "husky": "^9.0.11",
     "is-ci": "^3.0.1",
     "lint-staged": "^15.2.2",
     "nodemon": "^3.1.0",
     "postcss": "^8.4.38",
-    "prettier": "^3.2.5",
-    "prettier-plugin-tailwindcss": "^0.5.13",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.4.3",
+    "ultracite": "7.10.7",
     "vite": "^7.3.6",
     "vitest": "^4.1.11"
   },
+  "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=26.0.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write --ignore-unknown"
-    ]
-  },
-  "scripts": {
-    "build": "rm -rf dist && tsc && tsc -p src/web/tsconfig.json && vite build --config src/web/vite.config.ts",
-    "clean": "rm -rf dist node_modules",
-    "dev": "concurrently --kill-others \"tsc -w\" \"NODE_ENV=development nodemon dist/server/index.js\" \"vite --config src/web/vite.config.ts\"",
-    "format": "prettier --write src",
-    "lint": "eslint src test vitest.config.ts --ext .ts,.tsx",
-    "postinstall": "is-ci || husky",
-    "start": "pnpm build && node dist/server/index.js",
-    "test": "tsc -p tsconfig.test.json && vitest run"
-  },
-  "type": "module",
-  "packageManager": "pnpm@11.24.0"
+  }
 }

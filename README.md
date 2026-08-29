@@ -33,11 +33,12 @@ pnpm start
 
 One Node.js process listens on `http://localhost:8080`. It serves the built client from `dist/web` and handles WebSocket upgrades at `/ws`.
 
-Run checks:
+Run checks. `pnpm check` reports formatting and lint problems, `pnpm fix` applies the fixable ones:
 
 ```bash
-pnpm lint
+pnpm check
 pnpm build
+pnpm test
 ```
 
 ## Project structure

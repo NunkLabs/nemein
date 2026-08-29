@@ -1,5 +1,8 @@
+import type { FeatureBundle } from "framer-motion";
+import { LazyMotion } from "framer-motion";
+import { GameSocket, Opcodes } from "libs/Socket";
+import { useGameStore } from "libs/Store";
 import {
-  Fragment,
   lazy,
   Suspense,
   useCallback,
@@ -7,11 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { LazyMotion } from "framer-motion";
-import type { FeatureBundle } from "framer-motion";
-
-import { Opcodes, GameSocket } from "libs/Socket";
-import { useGameStore } from "libs/Store";
 
 const ControlPanel = lazy(() => import("components/panels/Control"));
 const Stage = lazy(() => import("components/game/Stage"));
@@ -59,10 +57,10 @@ export default function Nemein() {
   const gameOptions = useGameStore((state) => state.gameOptions);
   const gameStatus = useGameStore((state) => state.gameStatus);
   const updateGameLoadStates = useGameStore(
-    (state) => state.updateGameLoadStates,
+    (state) => state.updateGameLoadStates
   );
   const updateGamePerformance = useGameStore(
-    (state) => state.updateGamePerformance,
+    (state) => state.updateGamePerformance
   );
   const updateGameStates = useGameStore((state) => state.updateGameStates);
   const updateGameStatus = useGameStore((state) => state.updateGameStatus);
@@ -71,34 +69,40 @@ export default function Nemein() {
   const isActive = useRef<boolean>(false);
 
   const [featureBundle, setFeatureBundle] = useState<FeatureBundle | null>(
-    null,
+    null
   );
 
   const startGame = useCallback(() => {
-    if (!gameSocket.current) return;
+    if (!gameSocket.current) {
+      return;
+    }
 
     gameSocket.current.send({
-      op: Opcodes.SOCKET_READY,
       data: gameOptions.gameMode,
+      op: Opcodes.SOCKET_READY,
     });
 
     updateGameStatus("ongoing");
   }, [gameOptions.gameMode, updateGameStatus]);
 
   const toggleGame = useCallback(() => {
-    if (!gameSocket.current) return;
+    if (!gameSocket.current) {
+      return;
+    }
 
     isActive.current = !isActive.current;
 
     gameSocket.current.send({
-      op: Opcodes.GAME_TOGGLE,
       data: isActive.current,
+      op: Opcodes.GAME_TOGGLE,
     });
   }, []);
 
   const handleKeydown = useCallback(
     ({ key }: { key: string }) => {
-      if (!gameSocket.current || gameStatus === "initializing") return;
+      if (!gameSocket.current || gameStatus === "initializing") {
+        return;
+      }
 
       if (gameStatus !== "ending" && key === ESCAPE_KEY) {
         toggleGame();
@@ -106,14 +110,16 @@ export default function Nemein() {
         return;
       }
 
-      if (gameStatus !== "ongoing" || !VALID_KEYS.includes(key)) return;
+      if (gameStatus !== "ongoing" || !VALID_KEYS.includes(key)) {
+        return;
+      }
 
       gameSocket.current.send({
-        op: Opcodes.GAME_KEYDOWN,
         data: key,
+        op: Opcodes.GAME_KEYDOWN,
       });
     },
-    [gameStatus, toggleGame],
+    [gameStatus, toggleGame]
   );
 
   useEffect(() => {
@@ -128,7 +134,9 @@ export default function Nemein() {
 
   useEffect(() => {
     /* Imports and loads the feature bundle for Framer Motion */
-    if (gameLoadStates.featureBundle) return;
+    if (gameLoadStates.featureBundle) {
+      return;
+    }
 
     import("libs/Animation").then((res) => {
       setFeatureBundle(res.default);
@@ -143,7 +151,9 @@ export default function Nemein() {
 
     gameSocket.current
       .on("progress", ({ percent }) => {
-        if (percent < 100) return;
+        if (percent < 100) {
+          return;
+        }
 
         updateGameLoadStates({ gameSocket: true });
       })
@@ -193,7 +203,9 @@ export default function Nemein() {
 
     return () => {
       /* Cleans up socket on component unmount */
-      if (!gameSocket.current) return;
+      if (!gameSocket.current) {
+        return;
+      }
 
       gameSocket.current.removeAllListeners();
 
@@ -208,30 +220,28 @@ export default function Nemein() {
   ]);
 
   return (
-    <div className="font-montserrat grid h-screen min-w-fit place-items-center bg-gray-50 dark:bg-gray-950">
-      {gameLoadStates.initialLoad && (
+    <div className="grid h-screen min-w-fit place-items-center bg-gray-50 font-montserrat dark:bg-gray-950">
+      {gameLoadStates.initialLoad ? (
         /* Acts as a placeholder while waiting for the start panel */
         <div
-          className="fixed left-1/2 top-1/2 h-32 translate-x-[-50%] translate-y-[-50%] animate-pulse text-center text-5xl"
+          className="fixed top-1/2 left-1/2 h-32 translate-x-[-50%] translate-y-[-50%] animate-pulse text-center text-5xl"
           id="start-panel-initial-header"
         >
           nemein
         </div>
-      )}
-      {featureBundle && (
+      ) : null}
+      {featureBundle ? (
         /* Lazy-loads in the feature bundle */
         <LazyMotion features={featureBundle} strict>
-          {gameLoadStates.featureBundle && (
+          {gameLoadStates.featureBundle ? (
             <Suspense fallback={null}>
-              <Fragment>
-                <Stage />
-                <StartPanel startGame={startGame} />
-                <ControlPanel startGame={startGame} toggleGame={toggleGame} />
-              </Fragment>
+              <Stage />
+              <StartPanel startGame={startGame} />
+              <ControlPanel startGame={startGame} toggleGame={toggleGame} />
             </Suspense>
-          )}
+          ) : null}
         </LazyMotion>
-      )}
+      ) : null}
     </div>
   );
 }

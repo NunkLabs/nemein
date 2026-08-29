@@ -1,10 +1,9 @@
 import { WebSocketServer } from "ws";
-
-import { Socket } from "./Socket.js";
 import logger from "../utils/Logger.js";
+import type { Socket } from "./Socket.js";
 
-const LAST_SEEN_DURATION = 120000;
-const SWEEP_INTERVAL = 60000;
+const LAST_SEEN_DURATION = 120_000;
+const SWEEP_INTERVAL = 60_000;
 
 export class SocketServer extends WebSocketServer {
   sockets: Map<string, Socket>;
@@ -24,17 +23,19 @@ export class SocketServer extends WebSocketServer {
     this.sweepTimer = setInterval(() => {
       const currentTimestamp = Date.now();
 
-      this.sockets.forEach((socket) => {
-        if (currentTimestamp - socket.timestamp < LAST_SEEN_DURATION) return;
+      for (const socket of this.sockets.values()) {
+        if (currentTimestamp - socket.timestamp < LAST_SEEN_DURATION) {
+          continue;
+        }
 
         socket.destroy();
 
         this.sockets.delete(socket.id);
 
         logger.info(
-          `[Socket]: Connection ended with client (ID: ${socket.id})`,
+          `[Socket]: Connection ended with client (ID: ${socket.id})`
         );
-      });
+      }
     }, SWEEP_INTERVAL);
 
     if (this.sweepTimer.unref) {
@@ -49,5 +50,3 @@ export class SocketServer extends WebSocketServer {
     });
   }
 }
-
-export default SocketServer;

@@ -1,24 +1,25 @@
-import DmgManager, {
+import {
+  type AilmentReturnInfo,
+  CellStatus,
   DEFAULT_CELL_HP,
   DEFAULT_CHALLENGE_CELL_COLD_RES,
   DEFAULT_CHALLENGE_CELL_FIRE_RES,
   DEFAULT_CHALLENGE_CELL_HP,
   DEFAULT_CHALLENGE_CELL_LIGHTNING_RES,
   DEFAULT_CHALLENGE_CELL_PHYS_REDUC,
-  DefComposition,
-  CellStatus,
+  type DefComposition,
+  DmgManager,
   DmgType,
-  LineClearInfo,
-  AilmentReturnInfo,
+  type LineClearInfo,
 } from "./DmgManager.js";
 
 import {
+  TetrominoManager,
+  type TetrominoRotation,
+  TetrominoType,
   UPPER_Y_INDEX,
   X_INDEX,
   Y_INDEX,
-  TetrominoManager,
-  TetrominoRotation,
-  TetrominoType,
 } from "./TetrominoManager.js";
 
 /* Misc consts */
@@ -27,48 +28,48 @@ export const MAX_PIXEL = 4;
 export const DEFAULT_BOARD_WIDTH = 10;
 export const DEFAULT_BOARD_HEIGHT = 20;
 
-export type NemeinCell = {
-  type: TetrominoType;
-  hp: number;
+export interface NemeinCell {
   def: DefComposition;
+  hp: number;
   status: CellStatus;
-};
+  type: TetrominoType;
+}
 
-export type NemeinCol = {
+export interface NemeinCol {
   colArr: NemeinCell[];
   lowestY: number;
-};
+}
 
-export type ChallengeLine = {
+export interface ChallengeLine {
   idx: number;
-};
+}
 
-export type ClearRecord = {
-  idx: number;
-  lineTypeArr: TetrominoType[];
-  wasCrit: boolean;
+export interface ClearRecord {
   dmgDealt: {
     dominantDmgType: DmgType;
     value: number;
   };
-};
+  idx: number;
+  lineTypeArr: TetrominoType[];
+  wasCrit: boolean;
+}
 
 export class NemeinBoard {
-  private boardWidth: number;
+  private readonly boardWidth: number;
 
-  private boardHeight: number;
+  private readonly boardHeight: number;
 
   private gameField: NemeinCol[];
 
   private clearRecordsArr: ClearRecord[];
 
-  private challengeLine: ChallengeLine;
+  private readonly challengeLine: ChallengeLine;
 
-  private dmgManager: DmgManager;
+  private readonly dmgManager: DmgManager;
 
   constructor(
     boardWidth: number = DEFAULT_BOARD_WIDTH,
-    boardHeight: number = DEFAULT_BOARD_HEIGHT,
+    boardHeight: number = DEFAULT_BOARD_HEIGHT
   ) {
     this.boardWidth = boardWidth;
     this.boardHeight = boardHeight;
@@ -81,7 +82,7 @@ export class NemeinBoard {
       this.gameField,
       boardWidth,
       boardHeight,
-      this.challengeLine,
+      this.challengeLine
     );
 
     this.initFields();
@@ -95,15 +96,15 @@ export class NemeinBoard {
       const gameCol: NemeinCell[] = [];
       for (let y = 0; y < this.boardHeight; y += 1) {
         gameCol.push({
-          type: TetrominoType.Blank,
-          hp: 0,
           def: {
-            physReduc: 0,
-            fireRes: 0,
             coldRes: 0,
+            fireRes: 0,
             lightningRes: 0,
+            physReduc: 0,
           },
+          hp: 0,
           status: CellStatus.None,
+          type: TetrominoType.Blank,
         });
       }
 
@@ -132,10 +133,10 @@ export class NemeinBoard {
         let typeToSet = TetrominoType.Blank;
         let hpToSet = 0;
         let defToSet: DefComposition = {
-          physReduc: 0,
-          fireRes: 0,
           coldRes: 0,
+          fireRes: 0,
           lightningRes: 0,
+          physReduc: 0,
         };
         if (rowToShift > 0) {
           const upperCell = this.gameField[col].colArr[rowToShift - 1];
@@ -167,10 +168,10 @@ export class NemeinBoard {
         let typeToSet = TetrominoType.Blank;
         let hpToSet = 0;
         let defToSet: DefComposition = {
-          physReduc: 0,
-          fireRes: 0,
           coldRes: 0,
+          fireRes: 0,
           lightningRes: 0,
+          physReduc: 0,
         };
         if (rowToShift < this.boardHeight - 1) {
           const lowerCell = this.gameField[col].colArr[rowToShift + 1];
@@ -192,7 +193,7 @@ export class NemeinBoard {
    */
   private setClearRecord(
     info: LineClearInfo,
-    isClearingChallengeLine: boolean,
+    isClearingChallengeLine: boolean
   ): void {
     const lineClearedTypes: TetrominoType[] = [];
     const lineIdx = isClearingChallengeLine
@@ -236,13 +237,13 @@ export class NemeinBoard {
     }
 
     this.clearRecordsArr.push({
-      idx: lineIdx,
-      lineTypeArr: lineClearedTypes,
-      wasCrit: info.criticalHit,
       dmgDealt: {
         dominantDmgType: higestDmgType,
         value: highestDmgDealt,
       },
+      idx: lineIdx,
+      lineTypeArr: lineClearedTypes,
+      wasCrit: info.criticalHit,
     });
   }
 
@@ -251,7 +252,7 @@ export class NemeinBoard {
    * @return Current game field of the board (i.e. most up-to-date
    * field with all changes)
    */
-  public getGameField(): NemeinCol[] {
+  getGameField(): NemeinCol[] {
     return structuredClone(this.gameField);
   }
 
@@ -262,7 +263,7 @@ export class NemeinBoard {
    * @return Current clear records of the board (i.e. indicating lines that
    * are cleared to support Client rendering)
    */
-  public getClearRecords(wipeRecords: boolean = true): ClearRecord[] {
+  getClearRecords(wipeRecords = true): ClearRecord[] {
     const ret = structuredClone(this.clearRecordsArr);
     if (wipeRecords) {
       for (let row = 0; row < this.boardHeight; row += 1) {
@@ -277,7 +278,7 @@ export class NemeinBoard {
    * @param field: Field to be set
    * @note: Only works when NODE_ENV === "test" (i.e. in a test env)
    */
-  public setGameField(field: NemeinCol[]): void {
+  setGameField(field: NemeinCol[]): void {
     if (process.env.NODE_ENV === "test") {
       this.gameField = field;
     }
@@ -288,16 +289,14 @@ export class NemeinBoard {
    * current field
    * @return Number of cleared/complete lines
    */
-  public clearLines(): number {
+  clearLines(): number {
     /* We first calculate dmg (if any) dealt by the user by forming lines */
     const infoArr = this.dmgManager.calculateDmgPool();
 
     /* Check for complete lines and clear if there are any */
     let retNumLinesCompleted = 0;
 
-    for (let infoIdx = 0; infoIdx < infoArr.length; infoIdx += 1) {
-      const info = infoArr[infoIdx];
-
+    for (const info of infoArr) {
       /**
        * Record line cleared in status field. Note that we want the
        * raw (i.e. unshifted line indexes)
@@ -327,7 +326,7 @@ export class NemeinBoard {
 
       const challengeLineClearInfo = this.dmgManager.dealDmgToLine(
         info,
-        true /* isHittingChallengeLine */,
+        true /* isHittingChallengeLine */
       );
       if (challengeLineClearInfo.isLineCleared) {
         /**
@@ -336,7 +335,7 @@ export class NemeinBoard {
          */
         this.setClearRecord(
           challengeLineClearInfo.info,
-          true /* isClearingChallengeLine */,
+          true /* isClearingChallengeLine */
         );
         retNumLinesCompleted += 1;
         this.shiftLinesUpByOne(this.challengeLine.idx);
@@ -364,11 +363,11 @@ export class NemeinBoard {
    * @param type: Type of Tetromino
    * @param rotation: Tetromino's rotation
    */
-  public updateColLowestY(
+  updateColLowestY(
     corX: number,
     corY: number,
     type: TetrominoType,
-    rotation: TetrominoRotation,
+    rotation: TetrominoRotation
   ): void {
     const tetrominoCoords = TetrominoManager.getTetrominoCoords(type, rotation);
 
@@ -395,12 +394,12 @@ export class NemeinBoard {
    * @param: rotation - Rotation of tetromino
    * @param: renderValue - Render value (color of Tetromino)
    */
-  public renderTetromino(
+  renderTetromino(
     corX: number,
     corY: number,
     type: TetrominoType,
     rotation: TetrominoRotation,
-    renderValue: TetrominoType,
+    renderValue: TetrominoType
   ): void {
     const tetrominoCoords = TetrominoManager.getTetrominoCoords(type, rotation);
     for (let pixelIter = 0; pixelIter < MAX_PIXEL; pixelIter += 1) {
@@ -430,12 +429,12 @@ export class NemeinBoard {
    * @param: rotation: Rotation of tetromino
    * @return: True if renderable, false otw
    */
-  public isTetrominoRenderable(
+  isTetrominoRenderable(
     newlySpawned: boolean,
     corX: number,
     corY: number,
     type: TetrominoType,
-    rotation: TetrominoRotation,
+    rotation: TetrominoRotation
   ): boolean {
     let ret = true;
 
@@ -500,11 +499,11 @@ export class NemeinBoard {
    * @param: rotation: Rotation of tetromino
    * @return: Optimal Y for the ghost tetromino
    */
-  public findGhostTetrominoY(
+  findGhostTetrominoY(
     corX: number,
     corY: number,
     type: TetrominoType,
-    rotation: TetrominoRotation,
+    rotation: TetrominoRotation
   ): number {
     let retGhostCorY = 0;
     if (type < TetrominoType.Ghost) {
@@ -515,7 +514,7 @@ export class NemeinBoard {
 
       const tetrominoCoords = TetrominoManager.getTetrominoCoords(
         type,
-        rotation,
+        rotation
       );
       for (let pixelIter = 0; pixelIter < MAX_PIXEL; pixelIter += 1) {
         const coord = tetrominoCoords[pixelIter];
@@ -573,7 +572,7 @@ export class NemeinBoard {
           corX,
           retGhostCorY + 1,
           type,
-          rotation,
+          rotation
         )
       ) {
         retGhostCorY += 1;
@@ -609,15 +608,15 @@ export class NemeinBoard {
    * @param: rotation: Rotation of tetromino
    * @return: Center of rotation's ghost Y value of a newly spawned tetromino
    */
-  public prepareGhostTetrominoY(
+  prepareGhostTetrominoY(
     type: TetrominoType,
-    rotation: TetrominoRotation,
+    rotation: TetrominoRotation
   ): number {
     let ret = 0;
     if (type < TetrominoType.Ghost) {
       const tetrominoCoords = TetrominoManager.getTetrominoCoords(
         type,
-        rotation,
+        rotation
       );
 
       const pixelsToPivot = tetrominoCoords[UPPER_Y_INDEX][Y_INDEX];
@@ -631,7 +630,7 @@ export class NemeinBoard {
    * @brief Spawn a new challenge line (periodically called by Tetris core)
    * and update the challenge line's index
    */
-  public spawnChallengeLine(): void {
+  spawnChallengeLine(): void {
     if (this.challengeLine.idx > 0) {
       this.challengeLine.idx -= 1;
     }
@@ -645,15 +644,15 @@ export class NemeinBoard {
       }
       const { colArr } = column;
       const challengeCell = {
-        type: TetrominoType.Grey,
-        hp: DEFAULT_CHALLENGE_CELL_HP,
         def: {
-          physReduc: DEFAULT_CHALLENGE_CELL_PHYS_REDUC,
-          fireRes: DEFAULT_CHALLENGE_CELL_FIRE_RES,
           coldRes: DEFAULT_CHALLENGE_CELL_COLD_RES,
+          fireRes: DEFAULT_CHALLENGE_CELL_FIRE_RES,
           lightningRes: DEFAULT_CHALLENGE_CELL_LIGHTNING_RES,
+          physReduc: DEFAULT_CHALLENGE_CELL_PHYS_REDUC,
         },
+        hp: DEFAULT_CHALLENGE_CELL_HP,
         status: CellStatus.None,
+        type: TetrominoType.Grey,
       };
       colArr[this.boardHeight - 1] = challengeCell;
     }
@@ -662,13 +661,13 @@ export class NemeinBoard {
   /**
    * @brief Handle the additional logic when a tick occurs
    */
-  public notifyTick(): number {
+  notifyTick(): number {
     const ailmentRetInfo: AilmentReturnInfo = this.dmgManager.procAilments();
     const { lineClearInfoArr } = ailmentRetInfo;
-    for (let i = 0; i < lineClearInfoArr.length; i += 1) {
+    for (const lineClearInfo of lineClearInfoArr) {
       this.setClearRecord(
-        lineClearInfoArr[i].info,
-        true /* isClearingChallengeLine */,
+        lineClearInfo.info,
+        true /* isClearingChallengeLine */
       );
       this.shiftLinesUpByOne(this.challengeLine.idx);
       this.challengeLine.idx += 1;
@@ -690,7 +689,7 @@ export class NemeinBoard {
   static bitmapToNemeinCols(
     bitmap: number[],
     boardWidth: number,
-    boardHeight: number,
+    boardHeight: number
   ): NemeinCol[] {
     const ret: NemeinCol[] = [];
     if (bitmap.length === boardWidth * boardHeight) {
@@ -699,26 +698,21 @@ export class NemeinBoard {
           colArr: [],
           lowestY: boardHeight - 1,
         };
-        let firstPixel = false;
         for (let y = 0; y < boardHeight; y += 1) {
           const val = bitmap[y * boardWidth + x];
           col.colArr[y] = {
-            type: val,
-            hp: DEFAULT_CELL_HP,
             def: {
-              physReduc: 0,
-              fireRes: 0,
               coldRes: 0,
+              fireRes: 0,
               lightningRes: 0,
+              physReduc: 0,
             },
+            hp: DEFAULT_CELL_HP,
             status: CellStatus.None,
+            type: val,
           };
           if (val) {
-            if (firstPixel) {
-              firstPixel = false;
-            } else {
-              col.lowestY -= 1;
-            }
+            col.lowestY -= 1;
           }
         }
         ret.push(col);
@@ -749,5 +743,3 @@ export class NemeinBoard {
     return ret;
   }
 }
-
-export default NemeinBoard;

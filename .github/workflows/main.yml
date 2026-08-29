@@ -21,8 +21,8 @@ jobs:
           cache: true
           require-lockfile: true
 
-      - name: Run ESLint
-        run: pnpm lint
+      - name: Check formatting and lint
+        run: pnpm check
 
       - name: Build and type-check
         run: pnpm build

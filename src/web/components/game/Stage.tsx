@@ -1,24 +1,23 @@
-import { Fragment, useEffect, useRef, useState } from "react";
-import { Container, Sprite, Stage as PixiStage } from "@pixi/react";
-import { Texture } from "pixi.js";
+import { Container, Stage as PixiStage, Sprite } from "@pixi/react";
 import { AnimatePresence, m } from "framer-motion";
-
 import { DmgType, TetrominoType, useGameStore } from "libs/Store";
+import { Texture } from "pixi.js";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/theme";
+import BorderGraphics from "./BorderGraphics";
+import ClearedSprite from "./ClearedSprite";
+import DamageSprite from "./DamageSprite";
 import {
+  BASE_STYLE,
   DAMAGE_TYPE_STYLES,
-  HOLD_PANEL,
   GAME_PANEL,
+  HOLD_PANEL,
   QUEUE_PANEL,
   STAGE_SIZE,
   STAGE_SPACER,
   TETROMINO_STYLES,
   TETROMINOS_ARR,
-  BASE_STYLE,
 } from "./Misc";
-import BorderGraphics from "./BorderGraphics";
-import ClearedSprite from "./ClearedSprite";
-import DamageSprite from "./DamageSprite";
 import PerformanceTracker from "./PerformanceTracker";
 
 const SCREEN_SHAKE_INTERVAL_MS = 10;
@@ -28,6 +27,8 @@ const SCREEN_SHAKE_OFFSETS: [number, number][] = [
   [10, 10],
   [0, 0],
 ];
+
+const noop = () => null;
 
 function Stage() {
   const gameOptions = useGameStore((state) => state.gameOptions);
@@ -51,7 +52,9 @@ function Stage() {
   const [gameSprites, setGameSprites] = useState<JSX.Element[]>([]);
 
   useEffect(() => {
-    if (!gameStates) return;
+    if (!gameStates) {
+      return;
+    }
 
     const { damageColor, tetrominoColor, texture } = styles.current;
 
@@ -67,65 +70,69 @@ function Stage() {
             gameStates.gameOver ? (
               <ClearedSprite
                 isBlank={tetrominoName === "Blank"}
+                key={`game-over-${colIndex}-${rowIndex}`}
                 tint={tetrominoColor[tetrominoName]}
                 x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
                 y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
-                key={`game-over-${colIndex}-${rowIndex}`}
               />
             ) : (
               <Sprite
                 alpha={row.type === TetrominoType.Ghost ? 0.25 : 1}
                 height={GAME_PANEL.CHILD}
-                width={GAME_PANEL.CHILD}
+                key={`game-${colIndex}-${rowIndex}`}
                 position={[
                   GAME_PANEL.X + GAME_PANEL.CHILD * colIndex,
                   GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex,
                 ]}
                 texture={texture.blank}
                 tint={tetrominoColor[tetrominoName]}
-                key={`game-${colIndex}-${rowIndex}`}
+                width={GAME_PANEL.CHILD}
               />
-            ),
+            )
           );
         });
       });
 
       /* Handles line clear on Nemein game mode */
       if (gameStates.clearRecordsArr.length) {
-        gameStates.clearRecordsArr.forEach((clearRecord) => {
+        for (const clearRecord of gameStates.clearRecordsArr) {
           const { idx: rowIndex, lineTypeArr, dmgDealt } = clearRecord;
 
-          lineTypeArr.forEach((type, colIndex) => {
+          for (const [colIndex, type] of lineTypeArr.entries()) {
             blocksCleared.current += 1;
 
             sprites.push(
               <ClearedSprite
+                key={`cleared-block-${blocksCleared.current}`}
                 tint={tetrominoColor[TetrominoType[type]]}
                 x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
                 y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
-                key={`cleared-block-${blocksCleared.current}`}
-              />,
+              />
             );
-          });
+          }
 
-          if (lineTypeArr.includes(TetrominoType.Grey)) return;
+          if (lineTypeArr.includes(TetrominoType.Grey)) {
+            continue;
+          }
 
           linesCleared.current += 1;
 
           sprites.push(
             <DamageSprite
+              color={damageColor[DmgType[dmgDealt.dominantDmgType]]}
               dmgDealt={clearRecord.dmgDealt.value.toString()}
               dmgIndex={rowIndex}
+              key={`damage-number-${linesCleared.current}`}
               wasCrit={clearRecord.wasCrit}
-              color={damageColor[DmgType[dmgDealt.dominantDmgType]]}
               x={GAME_PANEL.X}
               y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
-              key={`damage-number-${linesCleared.current}`}
-            />,
+            />
           );
-        });
+        }
 
-        if (!gameOptions.stageShake) return;
+        if (!gameOptions.stageShake) {
+          return;
+        }
 
         let offsetIterationIndex = 0;
 
@@ -134,7 +141,9 @@ function Stage() {
 
           offsetIterationIndex += 1;
 
-          if (offsetIterationIndex < SCREEN_SHAKE_OFFSETS.length) return;
+          if (offsetIterationIndex < SCREEN_SHAKE_OFFSETS.length) {
+            return;
+          }
 
           clearInterval(stageShakeInterval);
         }, SCREEN_SHAKE_INTERVAL_MS);
@@ -148,15 +157,15 @@ function Stage() {
             <Sprite
               alpha={row === TetrominoType.Ghost ? 0.25 : 1}
               height={GAME_PANEL.CHILD}
-              width={GAME_PANEL.CHILD}
+              key={`game-${colIndex}-${rowIndex}`}
               position={[
                 GAME_PANEL.X + GAME_PANEL.CHILD * colIndex,
                 GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex,
               ]}
               texture={texture.blank}
               tint={tetrominoColor[tetrominoName]}
-              key={`game-${colIndex}-${rowIndex}`}
-            />,
+              width={GAME_PANEL.CHILD}
+            />
           );
         });
       });
@@ -173,15 +182,15 @@ function Stage() {
           <Sprite
             alpha={gameStates.gameOver ? 0.25 : 1}
             height={HOLD_PANEL.CHILD}
-            width={HOLD_PANEL.CHILD}
+            key={`hold-${colIndex}-${rowIndex}`}
             position={[
               HOLD_PANEL.X + HOLD_PANEL.CHILD * colIndex,
               HOLD_PANEL.Y + HOLD_PANEL.CHILD * rowIndex,
             ]}
             texture={texture.blank}
             tint={tetrominoColor[tetrominoName]}
-            key={`hold-${colIndex}-${rowIndex}`}
-          />,
+            width={HOLD_PANEL.CHILD}
+          />
         );
       });
     });
@@ -200,15 +209,15 @@ function Stage() {
             <Sprite
               alpha={gameStates.gameOver ? 0.25 : 1}
               height={QUEUE_PANEL.CHILD}
-              width={QUEUE_PANEL.CHILD}
+              key={`queue-${spawnedIndex}-${colIndex}-${rowIndex}`}
               position={[
                 QUEUE_PANEL.X + QUEUE_PANEL.CHILD * colIndex,
                 queuePanelYCoord + QUEUE_PANEL.CHILD * rowIndex,
               ]}
               texture={texture.blank}
               tint={tetrominoColor[tetrominoName]}
-              key={`queue-${spawnedIndex}-${colIndex}-${rowIndex}`}
-            />,
+              width={QUEUE_PANEL.CHILD}
+            />
           );
         });
       });
@@ -222,22 +231,22 @@ function Stage() {
   return (
     <PixiStage
       height={STAGE_SIZE}
-      width={STAGE_SIZE}
       options={{
-        hello: true, // Logs Pixi version & renderer type
         antialias: gameOptions.antialias,
         backgroundColor:
           theme === "light"
             ? BASE_STYLE.LIGHT.SECONDARY
             : BASE_STYLE.DARK.SECONDARY,
+        hello: true, // Logs Pixi version & renderer type
         powerPreference: gameOptions.powerPreference,
       }}
+      width={STAGE_SIZE}
     >
       <Container position={stagePosition}>
         <BorderGraphics />
         {gameSprites}
       </Container>
-      {gameOptions.performanceDisplay && <PerformanceTracker />}
+      {gameOptions.performanceDisplay ? <PerformanceTracker /> : null}
     </PixiStage>
   );
 }
@@ -252,28 +261,32 @@ export default function StageWrapper() {
   const gameStatus = useGameStore((state) => state.gameStatus);
   const gameLoadStates = useGameStore((state) => state.gameLoadStates);
   const updateGameLoadStates = useGameStore(
-    (state) => state.updateGameLoadStates,
+    (state) => state.updateGameLoadStates
+  );
+
+  const handleAnimationComplete = useCallback(
+    () => updateGameLoadStates({ gameStage: true }),
+    [updateGameLoadStates]
   );
 
   return (
-    gameLoadStates.gameRequest &&
     gameLoadStates.gameSocket && (
-      <Fragment>
+      <>
         <m.div
+          animate={{ opacity: 1, transition: { type: "spring" }, y: 0 }}
           initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0, transition: { type: "spring" } }}
-          onAnimationComplete={() => updateGameLoadStates({ gameStage: true })}
+          onAnimationComplete={handleAnimationComplete}
         >
           <Stage />
         </m.div>
         <div className="fixed bottom-[1%] left-1/2 translate-x-[-50%] translate-y-[-50%] text-sm">
-          <AnimatePresence onExitComplete={() => null}>
+          <AnimatePresence onExitComplete={noop}>
             {gameOptions.performanceDisplay && gameStatus === "ongoing" && (
               <m.p
-                key="performance-panel"
-                initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                key="performance-panel"
               >
                 current latency: {gamePerformance.currentLatency} ms • frame
                 rate: {gamePerformance.frameRate} fps • frame time:
@@ -282,7 +295,7 @@ export default function StageWrapper() {
             )}
           </AnimatePresence>
         </div>
-      </Fragment>
+      </>
     )
   );
 }

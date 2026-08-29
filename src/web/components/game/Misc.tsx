@@ -27,15 +27,15 @@ export const QUEUE_PANEL = {
 };
 
 export const BASE_STYLE = {
-  LIGHT: {
-    PRIMARY: 0x030712 /* Tailwind Gray 950 */,
-    SECONDARY: 0xf9fafb /* Tailwind Gray 50 */,
-    ALTERNATE: 0x111827 /* Tailwind Gray 900 */,
-  },
   DARK: {
-    PRIMARY: 0xf9fafb /* Tailwind Gray 50 */,
-    SECONDARY: 0x030712 /* Tailwind Gray 950 */,
-    ALTERNATE: 0xf3f4f6 /* Tailwind Gray 100 */,
+    ALTERNATE: 0xf3_f4_f6 /* Tailwind Gray 100 */,
+    PRIMARY: 0xf9_fa_fb /* Tailwind Gray 50 */,
+    SECONDARY: 0x03_07_12 /* Tailwind Gray 950 */,
+  },
+  LIGHT: {
+    ALTERNATE: 0x11_18_27 /* Tailwind Gray 900 */,
+    PRIMARY: 0x03_07_12 /* Tailwind Gray 950 */,
+    SECONDARY: 0xf9_fa_fb /* Tailwind Gray 50 */,
   },
 };
 
@@ -45,52 +45,52 @@ export const BORDER_STYLE = {
 };
 
 export const TETROMINO_STYLES: {
-  [key: string]: {
-    [key: string]: number;
+  [theme: string]: {
+    [style: string]: number;
   };
 } = {
-  LIGHT: {
-    Blank: BASE_STYLE.LIGHT.SECONDARY,
-    Square: 0xfef08a,
-    I: 0x93c5fd,
-    T: 0xd8b4fe,
-    J: 0xa5b4fc,
-    L: 0xfdba74,
-    Z: 0xfca5a5,
-    S: 0x86efac,
-    Grey: BASE_STYLE.LIGHT.ALTERNATE,
-    Ghost: BASE_STYLE.LIGHT.ALTERNATE,
-  },
   DARK: {
     Blank: BASE_STYLE.DARK.SECONDARY,
-    Square: 0xfef08a,
-    I: 0x93c5fd,
-    T: 0xd8b4fe,
-    J: 0xa5b4fc,
-    L: 0xfdba74,
-    Z: 0xfca5a5,
-    S: 0x86efac,
-    Grey: BASE_STYLE.DARK.ALTERNATE,
     Ghost: BASE_STYLE.DARK.ALTERNATE,
+    Grey: BASE_STYLE.DARK.ALTERNATE,
+    I: 0x93_c5_fd,
+    J: 0xa5_b4_fc,
+    L: 0xfd_ba_74,
+    S: 0x86_ef_ac,
+    Square: 0xfe_f0_8a,
+    T: 0xd8_b4_fe,
+    Z: 0xfc_a5_a5,
+  },
+  LIGHT: {
+    Blank: BASE_STYLE.LIGHT.SECONDARY,
+    Ghost: BASE_STYLE.LIGHT.ALTERNATE,
+    Grey: BASE_STYLE.LIGHT.ALTERNATE,
+    I: 0x93_c5_fd,
+    J: 0xa5_b4_fc,
+    L: 0xfd_ba_74,
+    S: 0x86_ef_ac,
+    Square: 0xfe_f0_8a,
+    T: 0xd8_b4_fe,
+    Z: 0xfc_a5_a5,
   },
 };
 
 export const DAMAGE_TYPE_STYLES: {
-  [key: string]: {
-    [key: string]: number;
+  [theme: string]: {
+    [style: string]: number;
   };
 } = {
-  LIGHT: {
-    Physical: BASE_STYLE.LIGHT.PRIMARY,
-    Fire: 0xfca5a5,
-    Cold: 0x93c5fd,
-    Lightning: 0xfef08a,
-  },
   DARK: {
+    Cold: 0x93_c5_fd,
+    Fire: 0xfc_a5_a5,
+    Lightning: 0xfe_f0_8a,
     Physical: BASE_STYLE.DARK.PRIMARY,
-    Fire: 0xfca5a5,
-    Cold: 0x93c5fd,
-    Lightning: 0xfef08a,
+  },
+  LIGHT: {
+    Cold: 0x93_c5_fd,
+    Fire: 0xfc_a5_a5,
+    Lightning: 0xfe_f0_8a,
+    Physical: BASE_STYLE.LIGHT.PRIMARY,
   },
 };
 

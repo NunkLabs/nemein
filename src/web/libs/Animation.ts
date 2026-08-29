@@ -1,4 +1,6 @@
-import { domAnimation } from "framer-motion";
+import { domAnimation, type FeatureBundle } from "framer-motion";
 
 /* Default-exports the feature bundle for lazy-loading */
-export default domAnimation;
+const featureBundle: FeatureBundle = domAnimation;
+
+export default featureBundle;

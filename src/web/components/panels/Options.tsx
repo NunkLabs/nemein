@@ -1,7 +1,3 @@
-import { useEffect } from "react";
-import { m } from "framer-motion";
-
-import { useGameStore } from "libs/Store";
 import { buttonVariants } from "components/ui/Button";
 import {
   Dialog,
@@ -27,6 +23,9 @@ import {
   TooltipTrigger,
 } from "components/ui/Tooltip";
 import { useToast } from "components/ui/UseToast";
+import { m } from "framer-motion";
+import { useGameStore } from "libs/Store";
+import { useCallback, useEffect } from "react";
 import { useTheme } from "@/theme";
 
 export default function OptionsPanel() {
@@ -36,6 +35,60 @@ export default function OptionsPanel() {
 
   const { resolvedTheme, setTheme } = useTheme();
   const { toast } = useToast();
+
+  const handleGameModeChange = useCallback(
+    (gameModeSelection: typeof gameOptions.gameMode) => {
+      updateGameOptions({
+        gameMode: gameModeSelection,
+      });
+
+      toast({
+        description: `
+          ${gameModeSelection} will now launch on your next game
+        `,
+        title: "Game mode changed!",
+      });
+    },
+    [toast, updateGameOptions]
+  );
+
+  const handlePerformanceDisplayChange = useCallback(
+    (enablePerformanceDisplay: boolean) =>
+      updateGameOptions({
+        performanceDisplay: enablePerformanceDisplay,
+      }),
+    [updateGameOptions]
+  );
+
+  const handleDarkModeChange = useCallback(
+    (enableDarkMode: boolean) => setTheme(enableDarkMode ? "dark" : "light"),
+    [setTheme]
+  );
+
+  const handleAntialiasChange = useCallback(
+    (enableAntialias: boolean) =>
+      updateGameOptions({
+        antialias: enableAntialias,
+      }),
+    [updateGameOptions]
+  );
+
+  const handlePowerPreferenceChange = useCallback(
+    (powerPreferenceSelection: typeof gameOptions.powerPreference) =>
+      updateGameOptions({
+        powerPreference: powerPreferenceSelection,
+      }),
+    [updateGameOptions]
+  );
+
+  const handleStageShakeChange = useCallback(
+    (enableStageShake: boolean) =>
+      updateGameOptions({
+        ...gameOptions,
+        stageShake: enableStageShake,
+      }),
+    [gameOptions, updateGameOptions]
+  );
 
   useEffect(() => {
     /**
@@ -50,9 +103,9 @@ export default function OptionsPanel() {
       <DialogTrigger asChild>
         <m.button
           className={buttonVariants({ variant: "secondary" })}
+          type="button"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          type="button"
         >
           Options
         </m.button>
@@ -68,26 +121,11 @@ export default function OptionsPanel() {
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">Game Mode</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Select the preferred game mode
                 </p>
               </div>
-              <Select
-                onValueChange={(
-                  gameModeSelection: typeof gameOptions.gameMode,
-                ) => {
-                  updateGameOptions({
-                    gameMode: gameModeSelection,
-                  });
-
-                  toast({
-                    title: "Game mode changed!",
-                    description: `
-                      ${gameModeSelection} will now launch on your next game
-                    `,
-                  });
-                }}
-              >
+              <Select onValueChange={handleGameModeChange}>
                 <SelectTrigger className="w-44">
                   <SelectValue placeholder={gameOptions.gameMode} />
                 </SelectTrigger>
@@ -100,31 +138,25 @@ export default function OptionsPanel() {
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">Performance Display</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Show latency and frame rate
                 </p>
               </div>
               <Switch
                 checked={gameOptions.performanceDisplay}
-                onCheckedChange={(enablePerformanceDisplay: boolean) =>
-                  updateGameOptions({
-                    performanceDisplay: enablePerformanceDisplay,
-                  })
-                }
+                onCheckedChange={handlePerformanceDisplayChange}
               />
             </div>
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">Dark Mode</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Embrace the dark
                 </p>
               </div>
               <Switch
                 checked={resolvedTheme === "dark"}
-                onCheckedChange={(enableDarkMode: boolean) =>
-                  setTheme(enableDarkMode ? "dark" : "light")
-                }
+                onCheckedChange={handleDarkModeChange}
               />
             </div>
           </TabsContent>
@@ -132,38 +164,26 @@ export default function OptionsPanel() {
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">Antialiasing</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Smooth out block edges
                 </p>
               </div>
               <Switch
                 checked={gameOptions.antialias}
-                onCheckedChange={(enableAntialias: boolean) =>
-                  updateGameOptions({
-                    antialias: enableAntialias,
-                  })
-                }
+                onCheckedChange={handleAntialiasChange}
               />
             </div>
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">GPU Mode</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Change the WebGL GPU power preference
                 </p>
               </div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Select
-                      onValueChange={(
-                        powerPreferenceSelection: typeof gameOptions.powerPreference,
-                      ) =>
-                        updateGameOptions({
-                          powerPreference: powerPreferenceSelection,
-                        })
-                      }
-                    >
+                    <Select onValueChange={handlePowerPreferenceChange}>
                       <SelectTrigger className="w-44">
                         <SelectValue
                           placeholder={gameOptions.powerPreference}
@@ -193,18 +213,13 @@ export default function OptionsPanel() {
             <div className="flex flex-row items-center justify-between p-3">
               <div className="space-y-1">
                 <Label className="text-base">Stage Shake</Label>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600 text-sm dark:text-gray-300">
                   Toggle the shake effect on line clear
                 </p>
               </div>
               <Switch
                 checked={gameOptions.stageShake}
-                onCheckedChange={(enableStageShake: boolean) =>
-                  updateGameOptions({
-                    ...gameOptions,
-                    stageShake: enableStageShake,
-                  })
-                }
+                onCheckedChange={handleStageShakeChange}
               />
             </div>
           </TabsContent>

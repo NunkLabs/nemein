@@ -7,21 +7,21 @@ import {
 import { join } from "node:path";
 import { nanoid } from "nanoid";
 import sirv from "sirv";
-
+import logger from "./utils/Logger.js";
 import { SocketServer } from "./websocket/Server.js";
 import { Socket } from "./websocket/Socket.js";
-import logger from "./utils/Logger.js";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "Content-Security-Policy":
     "default-src 'self'; connect-src 'self' ws: nemein.io *.nemein.io ; img-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
-  Server: "nemein",
   "Referrer-Policy": "strict-origin",
+  Server: "nemein",
   "X-Content-Type-Options": "nosniff",
   "X-DNS-Prefetch-Control": "on",
   "X-Frame-Options": "SAMEORIGIN",
 };
+const HASHED_ASSET_PATH = /[.-][a-f0-9]{8,}\./i;
 
 export interface ServerOptions {
   webRoot?: string;
@@ -48,7 +48,9 @@ export function createServer(options: ServerOptions = {}): Server {
 
     let cleanedUp = false;
     const cleanup = () => {
-      if (cleanedUp) return;
+      if (cleanedUp) {
+        return;
+      }
       cleanedUp = true;
 
       gameSocket.destroy();
@@ -71,29 +73,29 @@ export function createServer(options: ServerOptions = {}): Server {
   const serve = webRoot
     ? sirv(webRoot, {
         dev: process.env.NODE_ENV === "development",
-        single: true,
         dotfiles: false,
         setHeaders: (res: ServerResponse, pathname: string) => {
           if (pathname === "/" || pathname.endsWith(".html")) {
             res.setHeader("Cache-Control", "no-cache, must-revalidate");
           } else if (
             pathname.startsWith("/assets/") ||
-            /[.-][a-f0-9]{8,}\./i.test(pathname)
+            HASHED_ASSET_PATH.test(pathname)
           ) {
             res.setHeader(
               "Cache-Control",
-              "public, max-age=31536000, immutable",
+              "public, max-age=31536000, immutable"
             );
           }
         },
+        single: true,
       })
     : null;
 
   const server = createHttpServer((req, res) => {
     if (serve) {
-      Object.entries(SECURITY_HEADERS).forEach(([header, value]) => {
+      for (const [header, value] of Object.entries(SECURITY_HEADERS)) {
         res.setHeader(header, value);
-      });
+      }
       serve(req, res, () => {
         res.statusCode = 404;
         res.end("Not Found");

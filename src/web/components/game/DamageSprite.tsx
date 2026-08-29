@@ -1,11 +1,11 @@
-import { useMemo, useState, useRef } from "react";
 import { Text, useTick } from "@pixi/react";
 import { TextStyle } from "pixi.js";
+import { useMemo, useRef, useState } from "react";
 
-type TextProperties = {
+interface TextProperties {
   alpha: number;
   scale: number;
-};
+}
 
 /* Timer multiplier to control the speed of the animation */
 const ANIMATION_TIMER_MULTIPLIER = 3;
@@ -53,7 +53,7 @@ export default function DamageSprite({
       x: DAMAGE_NUMBER_X_OFFSET + x,
       y: DAMAGE_NUMBER_Y_OFFSET + y,
     }),
-    [dmgIndex, wasCrit, x, y],
+    [dmgIndex, wasCrit, x, y]
   );
 
   const [textProperties, setTextProperties] = useState<TextProperties>({
@@ -65,7 +65,7 @@ export default function DamageSprite({
    * The animation progressing logic is the same as ClearedBlock
    * {@see ClearedBlock}
    */
-  useTick((delta, ticker) => {
+  useTick((_delta, ticker) => {
     const renderTimeout = setTimeout(() => {
       if (time.current > ANIMATION_DURATION_S) {
         setTextProperties({
@@ -99,8 +99,8 @@ export default function DamageSprite({
         new TextStyle({
           align: "center",
           fill: color,
-          fontWeight: "bold",
           fontSize: 35,
+          fontWeight: "bold",
         })
       }
       text={dmgDealt}

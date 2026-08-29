@@ -1,26 +1,30 @@
 import { WebSocket } from "ws";
 
 import {
-  ClassicCommand,
   Classic,
-  ClassicStates,
+  ClassicCommand,
+  type ClassicStates,
 } from "../core/classic/Classic.js";
-import { NemeinCommand, Nemein, NemeinStates } from "../core/nemein/Nemein.js";
+import {
+  Nemein,
+  NemeinCommand,
+  type NemeinStates,
+} from "../core/nemein/Nemein.js";
 
 const DEFAULT_HEARTBEAT_INTERVAL_MS = 5000;
 const SPACE_KEY = " ";
 
 enum Opcodes {
   /* Base socket events */
-  SOCKET_OPEN,
-  SOCKET_READY,
-  SOCKET_PING,
-  SOCKET_HEARTBEAT,
+  SOCKET_OPEN = 0,
+  SOCKET_READY = 1,
+  SOCKET_PING = 2,
+  SOCKET_HEARTBEAT = 3,
 
   /* Game events */
-  GAME_KEYDOWN,
-  GAME_STATES,
-  GAME_TOGGLE,
+  GAME_KEYDOWN = 4,
+  GAME_STATES = 5,
+  GAME_TOGGLE = 6,
 }
 
 type GameInstance =
@@ -37,40 +41,40 @@ type GameInstance =
       interval: NodeJS.Timeout | null;
     };
 
-type SocketOpen = {
+interface SocketOpen {
+  data: number;
   op: Opcodes.SOCKET_OPEN;
-  data: number;
-};
+}
 
-type SocketReady = {
-  op: Opcodes.SOCKET_READY;
+interface SocketReady {
   data: "classic" | "nemein";
-};
+  op: Opcodes.SOCKET_READY;
+}
 
-type SocketPing = {
+interface SocketPing {
+  data: number;
   op: Opcodes.SOCKET_PING;
-  data: number;
-};
+}
 
-type SocketHeartbeat = {
+interface SocketHeartbeat {
+  data: number;
   op: Opcodes.SOCKET_HEARTBEAT;
-  data: number;
-};
+}
 
-type SocketGameKeydown = {
-  op: Opcodes.GAME_KEYDOWN;
+interface SocketGameKeydown {
   data: string;
-};
+  op: Opcodes.GAME_KEYDOWN;
+}
 
-type SocketGameStates = {
-  op: Opcodes.GAME_STATES;
+interface SocketGameStates {
   data: ClassicStates | NemeinStates;
-};
+  op: Opcodes.GAME_STATES;
+}
 
-type SocketGameToggle = {
-  op: Opcodes.GAME_TOGGLE;
+interface SocketGameToggle {
   data: boolean;
-};
+  op: Opcodes.GAME_TOGGLE;
+}
 
 type SocketData =
   | SocketOpen
@@ -82,7 +86,7 @@ type SocketData =
   | SocketGameToggle;
 
 export class Socket {
-  private socket: WebSocket;
+  private readonly socket: WebSocket;
 
   private active: boolean;
 
@@ -98,10 +102,10 @@ export class Socket {
     this.active = false;
 
     this.instance = {
-      type: "nemein",
       game: new Nemein(),
-      states: null,
       interval: null,
+      states: null,
+      type: "nemein",
     };
 
     this.id = id;
@@ -119,13 +123,15 @@ export class Socket {
   init() {
     /* Specifies client's heartbeat on open */
     this.send({
-      op: Opcodes.SOCKET_OPEN,
       data: DEFAULT_HEARTBEAT_INTERVAL_MS,
+      op: Opcodes.SOCKET_OPEN,
     });
 
     /* Sends updated game states after an interval */
     const gameUpdateInterval = () => {
-      if (!this.active || !this.instance.game) return;
+      if (!(this.active && this.instance.game)) {
+        return;
+      }
 
       const { type, game } = this.instance;
 
@@ -135,15 +141,19 @@ export class Socket {
           : game.updateClassicStates(ClassicCommand.Down);
 
       this.send({
-        op: Opcodes.GAME_STATES,
         data: this.instance.states,
+        op: Opcodes.GAME_STATES,
       });
 
-      if (!this.instance.states.gameOver) return;
+      if (!this.instance.states.gameOver) {
+        return;
+      }
 
       this.active = false;
 
-      if (!this.instance.interval) return;
+      if (!this.instance.interval) {
+        return;
+      }
 
       clearInterval(this.instance.interval);
 
@@ -160,21 +170,21 @@ export class Socket {
           this.instance =
             data === "nemein"
               ? {
-                  type: data,
                   game: new Nemein(),
-                  states: null,
                   interval: null,
+                  states: null,
+                  type: data,
                 }
               : {
-                  type: data,
                   game: new Classic(),
-                  states: null,
                   interval: null,
+                  states: null,
+                  type: data,
                 };
 
           this.send({
-            op: Opcodes.SOCKET_READY,
             data: this.instance.type,
+            op: Opcodes.SOCKET_READY,
           });
 
           const { type, game } = this.instance;
@@ -185,13 +195,13 @@ export class Socket {
               : game.updateClassicStates();
 
           this.send({
-            op: Opcodes.GAME_STATES,
             data: this.instance.states,
+            op: Opcodes.GAME_STATES,
           });
 
           this.instance.interval = setInterval(
             gameUpdateInterval,
-            this.instance.states.gameInterval,
+            this.instance.states.gameInterval
           );
 
           break;
@@ -199,8 +209,8 @@ export class Socket {
 
         case Opcodes.SOCKET_PING: {
           this.send({
-            op: Opcodes.SOCKET_PING,
             data,
+            op: Opcodes.SOCKET_PING,
           });
 
           break;
@@ -213,33 +223,33 @@ export class Socket {
           this.timestamp = clientTimestamp;
 
           this.send({
-            op: Opcodes.SOCKET_HEARTBEAT,
             data: this.timestamp,
+            op: Opcodes.SOCKET_HEARTBEAT,
           });
 
           break;
         }
 
         case Opcodes.GAME_KEYDOWN: {
-          if (!this.instance.game) return;
-
           /* Updates and sends the game state after registering an input */
           const key = data;
 
           this.instance.states = this.instance.game.inputHandle(key);
 
           this.send({
-            op: Opcodes.GAME_STATES,
             data: this.instance.states,
+            op: Opcodes.GAME_STATES,
           });
 
-          if (key !== SPACE_KEY || !this.instance.interval) return;
+          if (key !== SPACE_KEY || !this.instance.interval) {
+            return;
+          }
 
           clearInterval(this.instance.interval);
 
           this.instance.interval = setInterval(
             gameUpdateInterval,
-            this.instance.states.gameInterval,
+            this.instance.states.gameInterval
           );
 
           break;
@@ -249,8 +259,8 @@ export class Socket {
           this.active = data;
 
           this.send({
-            op: Opcodes.GAME_TOGGLE,
             data: this.active,
+            op: Opcodes.GAME_TOGGLE,
           });
 
           break;
@@ -266,9 +276,13 @@ export class Socket {
    * by clearing the game interval and closing the connection.
    */
   destroy() {
-    if (this.instance.interval) clearInterval(this.instance.interval);
+    if (this.instance.interval) {
+      clearInterval(this.instance.interval);
+    }
 
-    if (!this.socket) return;
+    if (!this.socket) {
+      return;
+    }
 
     this.socket.removeAllListeners();
 
@@ -280,10 +294,10 @@ export class Socket {
    * @param:   {SocketData}   data   Data to send to the client
    */
   send(data: SocketData) {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
 
     this.socket.send(JSON.stringify(data));
   }
 }
-
-export default Socket;

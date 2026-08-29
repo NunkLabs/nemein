@@ -393,65 +393,65 @@ const SQUARE_TETROMINO_NUM_TESTS_TO_REMOVE = 4;
 
 /* Enum types */
 export enum TetrominoType {
-  Blank,
-  Square,
-  I,
-  T,
-  J,
-  L,
-  Z,
-  S,
-  Grey,
-  Ghost,
-  NumTetrominoTypes,
+  Blank = 0,
+  Square = 1,
+  I = 2,
+  T = 3,
+  J = 4,
+  L = 5,
+  Z = 6,
+  S = 7,
+  Grey = 8,
+  Ghost = 9,
+  NumTetrominoTypes = 10,
 }
 
 export enum TetrominoRotation {
-  O,
-  R,
-  Z,
-  L,
-  NumTetrominoRotations,
+  O = 0,
+  R = 1,
+  Z = 2,
+  L = 3,
+  NumTetrominoRotations = 4,
 }
 
 export enum TetrominoRotateDirection {
-  Clockwise,
-  Counterclockwise,
-  NumTetrominoDirections,
+  Clockwise = 0,
+  Counterclockwise = 1,
+  NumTetrominoDirections = 2,
 }
 
 export const DEFAULT_TEST_OVERWRITTEN_TETROMINO: Tetromino = {
-  type: TetrominoType.Blank,
   rotation: TetrominoRotation.O,
+  type: TetrominoType.Blank,
 };
 
 /* Tetromino types */
-export type Tetromino = {
-  type: TetrominoType;
+export interface Tetromino {
   rotation: TetrominoRotation;
-};
+  type: TetrominoType;
+}
 
 export class TetrominoManager {
   private activeTetromino: Tetromino;
 
-  private spawnedTetrominos: Tetromino[];
+  private readonly spawnedTetrominos: Tetromino[];
 
   private heldTetromino: Tetromino;
 
   /* This only applies when we're in a test env */
-  private dbgOverwrittenTetromino: Tetromino;
+  private readonly dbgOverwrittenTetromino: Tetromino;
 
   constructor(
-    dbgOverwrittenTetromino: Tetromino = DEFAULT_TEST_OVERWRITTEN_TETROMINO,
+    dbgOverwrittenTetromino: Tetromino = DEFAULT_TEST_OVERWRITTEN_TETROMINO
   ) {
     this.activeTetromino = {
-      type: TetrominoType.Blank,
       rotation: TetrominoRotation.O,
+      type: TetrominoType.Blank,
     };
     this.spawnedTetrominos = [];
     this.heldTetromino = {
-      type: TetrominoType.Blank,
       rotation: TetrominoRotation.O,
+      type: TetrominoType.Blank,
     };
     this.dbgOverwrittenTetromino = dbgOverwrittenTetromino;
 
@@ -490,11 +490,11 @@ export class TetrominoManager {
     } else {
       const spawnedTetrominoType =
         Math.floor(
-          Math.random() * (MAX_TETROMINO_INDEX - MIN_TETROMINO_INDEX + 1),
+          Math.random() * (MAX_TETROMINO_INDEX - MIN_TETROMINO_INDEX + 1)
         ) + 1;
       newTetromino = {
-        type: spawnedTetrominoType,
         rotation: TetrominoRotation.O,
+        type: spawnedTetrominoType,
       };
     }
     this.spawnedTetrominos.push(newTetromino);
@@ -504,23 +504,23 @@ export class TetrominoManager {
    * @brief: setActiveTetromino: Set the current active Tetromino
    * @param tetromino: Tetromino to be set as active
    */
-  public setActiveTetromino(tetromino: Tetromino): void {
+  setActiveTetromino(tetromino: Tetromino): void {
     this.activeTetromino = tetromino;
   }
 
   /**
    * @brief: swapHeldTetromino: Swap the held Tetromino with the active one
    */
-  public swapHeldTetromino(): void {
+  swapHeldTetromino(): void {
     /* If there was a previously held tetromino, we have to switch the
     held one vs the one to be held */
-    if (this.heldTetromino.type !== TetrominoType.Blank) {
+    if (this.heldTetromino.type === TetrominoType.Blank) {
+      this.heldTetromino = this.activeTetromino;
+      this.getNewTetromino();
+    } else {
       const prevTetromino = this.activeTetromino;
       this.activeTetromino = this.heldTetromino;
       this.heldTetromino = prevTetromino;
-    } else {
-      this.heldTetromino = this.activeTetromino;
-      this.getNewTetromino();
     }
 
     /* Change the held Tetromino's rotation to the default rotation (O) */
@@ -533,7 +533,7 @@ export class TetrominoManager {
    * a new Tetromino.
    * @return: The new active Tetromino
    */
-  public getNewTetromino(): Tetromino {
+  getNewTetromino(): Tetromino {
     const retTetromino = this.spawnedTetrominos.shift();
     if (retTetromino) {
       this.activeTetromino = retTetromino;
@@ -554,7 +554,7 @@ export class TetrominoManager {
    * @brief: getActiveTetromino: Get the current active Tetromino
    * @returns Current active Tetromino
    */
-  public getActiveTetromino(): Tetromino {
+  getActiveTetromino(): Tetromino {
     return structuredClone(this.activeTetromino);
   }
 
@@ -564,9 +564,7 @@ export class TetrominoManager {
    * types
    * @returns Current spawned Tetrominos queue
    */
-  public getSpawnedTetrominos(
-    onlyTypeNeeded: boolean,
-  ): Tetromino[] | TetrominoType[] {
+  getSpawnedTetrominos(onlyTypeNeeded: boolean): Tetromino[] | TetrominoType[] {
     if (onlyTypeNeeded) {
       const ret: TetrominoType[] = [];
       for (
@@ -585,7 +583,7 @@ export class TetrominoManager {
    * @brief: getHeldTetromino: Get the current held Tetromino
    * @returns Current held Tetromino
    */
-  public getHeldTetromino(): Tetromino {
+  getHeldTetromino(): Tetromino {
     return structuredClone(this.heldTetromino);
   }
 
@@ -597,7 +595,7 @@ export class TetrominoManager {
    */
   static getTetrominoCoords(
     type: TetrominoType,
-    rotation: TetrominoRotation,
+    rotation: TetrominoRotation
   ): number[][] {
     return TETROMINOS_COORDS_ARR[type][rotation];
   }
@@ -613,7 +611,7 @@ export class TetrominoManager {
   static getTetrominoWallKickOffsets(
     type: TetrominoType,
     rotation: TetrominoRotation,
-    direction: TetrominoRotateDirection,
+    direction: TetrominoRotateDirection
   ): number[][] {
     let ret: number[][] = [];
 
@@ -622,10 +620,10 @@ export class TetrominoManager {
       ret =
         type === TetrominoType.I
           ? JSON.parse(
-              JSON.stringify(I_WALL_KICK_COR_OFFSETS[rotation][direction]),
+              JSON.stringify(I_WALL_KICK_COR_OFFSETS[rotation][direction])
             )
           : JSON.parse(
-              JSON.stringify(JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction]),
+              JSON.stringify(JLSTZ_WALL_KICK_COR_OFFSETS[rotation][direction])
             );
       if (type === TetrominoType.T) {
         if (rotation === TetrominoRotation.O) {
@@ -647,5 +645,3 @@ export class TetrominoManager {
     return ret;
   }
 }
-
-export default TetrominoManager;

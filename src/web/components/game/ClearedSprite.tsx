@@ -1,16 +1,15 @@
-import { useMemo, useState, useRef } from "react";
 import { Sprite, useTick } from "@pixi/react";
-import { Texture } from "pixi.js";
-
 import { randomFloatInRange } from "libs/Utils";
+import { Texture } from "pixi.js";
+import { useMemo, useRef, useState } from "react";
 import { GAME_PANEL } from "./Misc";
 
-type SpriteProperties = {
+interface SpriteProperties {
   alpha: number;
   position: [number, number];
   rotation: number;
   scale: number;
-};
+}
 
 /* Timer multiplier to control the speed of the animation */
 const ANIMATION_TIMER_MULTIPLIER = 5;
@@ -57,22 +56,6 @@ export default function ClearedSprite({
 
   const baseProperties = useMemo(
     () => ({
-      /**
-       * Randomizes final displacement values relative to the block's size, and
-       * the final radian rotation value
-       */
-      xDisplacement:
-        GAME_PANEL.CHILD *
-        randomFloatInRange(
-          HORIZONTAL_DISPLACEMENT_FLOOR,
-          HORIZONTAL_DISPLACEMENT_CEILING,
-        ),
-      yDisplacement:
-        GAME_PANEL.CHILD *
-        randomFloatInRange(
-          VERTICAL_DISPLACEMENT_FLOOR,
-          VERTICAL_DISPLACEMENT_CEILING,
-        ),
       rotation: randomFloatInRange(RADIAN_ROTATION_FLOOR, RADIAN_ROTATION_CEIL),
       /**
        * Randomizes the block scaling, where approximately 20% will grow and
@@ -82,8 +65,24 @@ export default function ClearedSprite({
         Math.random() < MINORITY_RATIO
           ? randomFloatInRange(MINORITY_SCALE_FLOOR, MINORITY_SCALE_CEILING)
           : randomFloatInRange(MAJORITY_SCALE_FLOOR, MAJORITY_SCALE_CEILING),
+      /**
+       * Randomizes final displacement values relative to the block's size, and
+       * the final radian rotation value
+       */
+      xDisplacement:
+        GAME_PANEL.CHILD *
+        randomFloatInRange(
+          HORIZONTAL_DISPLACEMENT_FLOOR,
+          HORIZONTAL_DISPLACEMENT_CEILING
+        ),
+      yDisplacement:
+        GAME_PANEL.CHILD *
+        randomFloatInRange(
+          VERTICAL_DISPLACEMENT_FLOOR,
+          VERTICAL_DISPLACEMENT_CEILING
+        ),
     }),
-    [],
+    []
   );
 
   const [spriteProperties, setSpriteProperties] = useState<SpriteProperties>({
@@ -107,7 +106,7 @@ export default function ClearedSprite({
    */
   const acceleration = -2 * velocity;
 
-  useTick((delta, ticker) => {
+  useTick((_delta, ticker) => {
     if (time.current > ANIMATION_DURATION_S) {
       /* Resets and ensures the sprite is hidden until it's detached */
       setSpriteProperties({
@@ -160,11 +159,11 @@ export default function ClearedSprite({
       alpha={isBlank ? 0 : spriteProperties.alpha}
       anchor={SPRITE_ANCHOR}
       height={GAME_PANEL.CHILD * spriteProperties.scale}
-      width={GAME_PANEL.CHILD * spriteProperties.scale}
       position={spriteProperties.position}
       rotation={spriteProperties.rotation}
       texture={textures.current.blank}
       tint={tint}
+      width={GAME_PANEL.CHILD * spriteProperties.scale}
     />
   );
 }

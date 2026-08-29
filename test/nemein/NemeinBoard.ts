@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  DEFAULT_BOARD_WIDTH,
   DEFAULT_BOARD_HEIGHT,
+  DEFAULT_BOARD_WIDTH,
   NemeinBoard,
-  NemeinCol,
+  type NemeinCol,
 } from "../../src/core/nemein/Board";
 
 import {
@@ -26,7 +26,7 @@ describe("NemeinBoard", () => {
 
       it("Should return a playfield with correct DEFAULT_BOARD_WIDTH", () => {
         expect(testField, `Width is not ${DEFAULT_BOARD_WIDTH}`).toHaveLength(
-          DEFAULT_BOARD_WIDTH,
+          DEFAULT_BOARD_WIDTH
         );
       });
 
@@ -34,7 +34,7 @@ describe("NemeinBoard", () => {
         for (let x = 0; x < DEFAULT_BOARD_WIDTH; x += 1) {
           expect(
             testField[x].colArr,
-            `Col ${x}'s length is not ${DEFAULT_BOARD_HEIGHT}`,
+            `Col ${x}'s length is not ${DEFAULT_BOARD_HEIGHT}`
           ).toHaveLength(DEFAULT_BOARD_HEIGHT);
         }
       });
@@ -45,7 +45,7 @@ describe("NemeinBoard", () => {
           expect(
             testField[x].lowestY,
             `Col[${x}] does not have lowest y value of
-          ${DEFAULT_BOARD_HEIGHT - 1}`,
+          ${DEFAULT_BOARD_HEIGHT - 1}`
           ).toBe(DEFAULT_BOARD_HEIGHT - 1);
         }
       });
@@ -55,7 +55,7 @@ describe("NemeinBoard", () => {
           const col = testField[x].colArr;
           for (let y = 0; y < DEFAULT_BOARD_HEIGHT; y += 1) {
             expect(col[y].type, `Pixel ${x} on row ${y} is not blank`).toBe(
-              TetrominoType.Blank,
+              TetrominoType.Blank
             );
           }
         }
@@ -65,14 +65,14 @@ describe("NemeinBoard", () => {
     describe("With input arguments", () => {
       const testBoard = new NemeinBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT,
+        DEFAULT_TEST_BOARD_HEIGHT
       );
       const testField = testBoard.getGameField();
 
       it("Should return a playfield with correct input board width", () => {
         expect(
           testField,
-          `Width is not ${DEFAULT_TEST_BOARD_WIDTH}`,
+          `Width is not ${DEFAULT_TEST_BOARD_WIDTH}`
         ).toHaveLength(DEFAULT_TEST_BOARD_WIDTH);
       });
 
@@ -80,7 +80,7 @@ describe("NemeinBoard", () => {
         for (let x = 0; x < DEFAULT_TEST_BOARD_WIDTH; x += 1) {
           expect(
             testField[x].colArr,
-            `Col ${x}'s length is not ${DEFAULT_TEST_BOARD_HEIGHT}`,
+            `Col ${x}'s length is not ${DEFAULT_TEST_BOARD_HEIGHT}`
           ).toHaveLength(DEFAULT_TEST_BOARD_HEIGHT);
         }
       });
@@ -91,7 +91,7 @@ describe("NemeinBoard", () => {
           expect(
             testField[x].lowestY,
             `Col[${x}] does not have lowest y value of 
-          ${DEFAULT_TEST_BOARD_HEIGHT - 1}`,
+          ${DEFAULT_TEST_BOARD_HEIGHT - 1}`
           ).toBe(DEFAULT_TEST_BOARD_HEIGHT - 1);
         }
       });
@@ -101,7 +101,7 @@ describe("NemeinBoard", () => {
           const col = testField[x].colArr;
           for (let y = 0; y < DEFAULT_TEST_BOARD_HEIGHT; y += 1) {
             expect(col[y].type, `Pixel ${x} on row ${y} is not blank`).toBe(
-              TetrominoType.Blank,
+              TetrominoType.Blank
             );
           }
         }
@@ -113,7 +113,7 @@ describe("NemeinBoard", () => {
     describe("Test clearing lines", () => {
       const testBoard = new NemeinBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT,
+        DEFAULT_TEST_BOARD_HEIGHT
       );
 
       /* Render four complete rows through the live game field. */
@@ -127,20 +127,20 @@ describe("NemeinBoard", () => {
           row,
           TetrominoType.I,
           TetrominoRotation.O,
-          TetrominoType.I,
+          TetrominoType.I
         );
         testBoard.renderTetromino(
           4,
           row,
           TetrominoType.T,
           TetrominoRotation.O,
-          TetrominoType.T,
+          TetrominoType.T
         );
       }
       it("Should return the correct number of cleared lines", () => {
         expect(
           testBoard.clearLines(),
-          `Number of cleared lines is not ${DEFAULT_TEST_NUM_CLEAR_LINES}`,
+          `Number of cleared lines is not ${DEFAULT_TEST_NUM_CLEAR_LINES}`
         ).toBe(DEFAULT_TEST_NUM_CLEAR_LINES);
       });
     });
@@ -158,7 +158,7 @@ describe("NemeinBoard", () => {
        */
       const testBoard = new NemeinBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT,
+        DEFAULT_TEST_BOARD_HEIGHT
       );
       const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
       const testCorY = DEFAULT_TEST_BOARD_HEIGHT / 2;
@@ -166,21 +166,21 @@ describe("NemeinBoard", () => {
         testCorX,
         testCorY,
         DEFAULT_TEST_TETROMINO_TYPE,
-        DEFAULT_TEST_TETROMINO_ROTATION,
+        DEFAULT_TEST_TETROMINO_ROTATION
       );
       const testField = testBoard.getGameField();
       it("Should update the correct lowest y values", () => {
         expect(
           testField[testCorX].lowestY,
-          `Middle lowest y value is not ${testCorY - 1}`,
+          `Middle lowest y value is not ${testCorY - 1}`
         ).toBe(testCorY - 1);
         expect(
           testField[testCorX - 1].lowestY,
-          `Left lowest y value is not ${testCorY}`,
+          `Left lowest y value is not ${testCorY}`
         ).toBe(testCorY);
         expect(
           testField[testCorX + 1].lowestY,
-          `Right lowest y value is not ${testCorY}`,
+          `Right lowest y value is not ${testCorY}`
         ).toBe(testCorY);
       });
     });
@@ -193,11 +193,11 @@ describe("NemeinBoard", () => {
       describe("Test rendering newly spawned Tetromino", () => {
         const testBoard = new NemeinBoard(
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT,
+          DEFAULT_TEST_BOARD_HEIGHT
         );
         const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
         const testCorY = 0;
-        // prettier-ignore
+        // biome-ignore format: keep the board grid readable
         const testBitmap = [
           0, 0, 3, 3, 3, 0,
           0, 0, 0, 0, 0, 0,
@@ -215,11 +215,11 @@ describe("NemeinBoard", () => {
           testCorY,
           DEFAULT_TEST_TETROMINO_TYPE,
           DEFAULT_TEST_TETROMINO_ROTATION,
-          DEFAULT_TEST_TETROMINO_TYPE,
+          DEFAULT_TEST_TETROMINO_TYPE
         );
         it("Should render correctly", () => {
           expect(testBitmap, "Returned bitmap is incorrect").toStrictEqual(
-            NemeinBoard.NemeinColsToBitmap(testBoard.getGameField()),
+            NemeinBoard.NemeinColsToBitmap(testBoard.getGameField())
           );
         });
       });
@@ -227,11 +227,11 @@ describe("NemeinBoard", () => {
       describe("Test rendering Tetromino on blocked movement", () => {
         const testBoard = new NemeinBoard(
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT,
+          DEFAULT_TEST_BOARD_HEIGHT
         );
         const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
         const testCorY = DEFAULT_TEST_BOARD_HEIGHT - 1;
-        // prettier-ignore
+        // biome-ignore format: keep the board grid readable
         const testBitmap = [
           0, 0, 0, 0, 0, 0,
           0, 0, 0, 0, 0, 0,
@@ -249,11 +249,11 @@ describe("NemeinBoard", () => {
           testCorY,
           DEFAULT_TEST_TETROMINO_TYPE,
           DEFAULT_TEST_TETROMINO_ROTATION,
-          DEFAULT_TEST_TETROMINO_TYPE,
+          DEFAULT_TEST_TETROMINO_TYPE
         );
         it("Should render correctly", () => {
           expect(testBitmap, "Returned bitmap is incorrect").toStrictEqual(
-            NemeinBoard.NemeinColsToBitmap(testBoard.getGameField()),
+            NemeinBoard.NemeinColsToBitmap(testBoard.getGameField())
           );
         });
       });
@@ -268,7 +268,7 @@ describe("NemeinBoard", () => {
         describe("Test renderable", () => {
           const testBoard = new NemeinBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT,
+            DEFAULT_TEST_BOARD_HEIGHT
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = 0;
@@ -279,9 +279,9 @@ describe("NemeinBoard", () => {
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION,
+                DEFAULT_TEST_TETROMINO_ROTATION
               ),
-              "The Tetromino returned non-renderable",
+              "The Tetromino returned non-renderable"
             ).toBe(true);
           });
         });
@@ -289,11 +289,11 @@ describe("NemeinBoard", () => {
         describe("Test non-renderable", () => {
           const testBoard = new NemeinBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT,
+            DEFAULT_TEST_BOARD_HEIGHT
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = 0;
-          // prettier-ignore
+          // biome-ignore format: keep the board grid readable
           const testBitmap = [
             0, 0, 0, 3, 0, 0,
             0, 0, 3, 3, 3, 0,
@@ -310,8 +310,8 @@ describe("NemeinBoard", () => {
             NemeinBoard.bitmapToNemeinCols(
               testBitmap,
               DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT,
-            ),
+              DEFAULT_TEST_BOARD_HEIGHT
+            )
           );
           it("Should not be able to render", () => {
             expect(
@@ -320,9 +320,9 @@ describe("NemeinBoard", () => {
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION,
+                DEFAULT_TEST_TETROMINO_ROTATION
               ),
-              "The Tetromino returned renderable",
+              "The Tetromino returned renderable"
             ).toBe(false);
           });
         });
@@ -332,7 +332,7 @@ describe("NemeinBoard", () => {
         describe("Test renderable", () => {
           const testBoard = new NemeinBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT,
+            DEFAULT_TEST_BOARD_HEIGHT
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           /**
@@ -347,9 +347,9 @@ describe("NemeinBoard", () => {
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION,
+                DEFAULT_TEST_TETROMINO_ROTATION
               ),
-              "The Tetromino returned non-renderable",
+              "The Tetromino returned non-renderable"
             ).toBe(true);
           });
         });
@@ -357,11 +357,11 @@ describe("NemeinBoard", () => {
         describe("Test non-renderable", () => {
           const testBoard = new NemeinBoard(
             DEFAULT_TEST_BOARD_WIDTH,
-            DEFAULT_TEST_BOARD_HEIGHT,
+            DEFAULT_TEST_BOARD_HEIGHT
           );
           const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
           const testCorY = DEFAULT_TEST_BOARD_HEIGHT / 2;
-          // prettier-ignore
+          // biome-ignore format: keep the board grid readable
           const testBitmap = [
             0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
@@ -378,8 +378,8 @@ describe("NemeinBoard", () => {
             NemeinBoard.bitmapToNemeinCols(
               testBitmap,
               DEFAULT_TEST_BOARD_WIDTH,
-              DEFAULT_TEST_BOARD_HEIGHT,
-            ),
+              DEFAULT_TEST_BOARD_HEIGHT
+            )
           );
           it("Should not be able to render", () => {
             expect(
@@ -388,9 +388,9 @@ describe("NemeinBoard", () => {
                 testCorX,
                 testCorY,
                 DEFAULT_TEST_TETROMINO_TYPE,
-                DEFAULT_TEST_TETROMINO_ROTATION,
+                DEFAULT_TEST_TETROMINO_ROTATION
               ),
-              "The Tetromino returned renderable",
+              "The Tetromino returned renderable"
             ).toBe(false);
           });
         });
@@ -404,11 +404,11 @@ describe("NemeinBoard", () => {
        */
       const testBoard = new NemeinBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT,
+        DEFAULT_TEST_BOARD_HEIGHT
       );
       const testCorX = DEFAULT_TEST_BOARD_WIDTH / 2;
       const testCorY = 0;
-      // prettier-ignore
+      // biome-ignore format: keep the board grid readable
       const testBitmap = [
         0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0,
@@ -425,8 +425,8 @@ describe("NemeinBoard", () => {
         NemeinBoard.bitmapToNemeinCols(
           testBitmap,
           DEFAULT_TEST_BOARD_WIDTH,
-          DEFAULT_TEST_BOARD_HEIGHT,
-        ),
+          DEFAULT_TEST_BOARD_HEIGHT
+        )
       );
       it(`Should find the ghost y value that is dictated by the lowest y
         among the number of cols this tetromino spans`, () => {
@@ -437,14 +437,14 @@ describe("NemeinBoard", () => {
          */
         expect(
           DEFAULT_TEST_BOARD_HEIGHT / 2,
-          "Ghost y value found is incorrect",
+          "Ghost y value found is incorrect"
         ).toBe(
           testBoard.findGhostTetrominoY(
             testCorX,
             testCorY,
             DEFAULT_TEST_TETROMINO_TYPE,
-            DEFAULT_TEST_TETROMINO_ROTATION,
-          ),
+            DEFAULT_TEST_TETROMINO_ROTATION
+          )
         );
       });
     });
@@ -452,7 +452,7 @@ describe("NemeinBoard", () => {
     describe("Test ghost Tetromino coord's y value preparing", () => {
       const testBoard = new NemeinBoard(
         DEFAULT_TEST_BOARD_WIDTH,
-        DEFAULT_TEST_BOARD_HEIGHT,
+        DEFAULT_TEST_BOARD_HEIGHT
       );
       it(`Should find the ghost y value that is dictated by the lowest y
       among the number of cols this tetromino spans`, () => {
@@ -464,10 +464,10 @@ describe("NemeinBoard", () => {
           if (type !== TetrominoType.Blank) {
             const prepGhostY = testBoard.prepareGhostTetrominoY(
               type,
-              DEFAULT_TEST_TETROMINO_ROTATION,
+              DEFAULT_TEST_TETROMINO_ROTATION
             );
             expect(prepGhostY, "Ghost y value prepared is incorrect").toBe(
-              DEFAULT_TEST_BOARD_HEIGHT - 1,
+              DEFAULT_TEST_BOARD_HEIGHT - 1
             );
           }
         }

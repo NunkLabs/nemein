@@ -9,17 +9,17 @@ import {
 
 type Theme = "dark" | "light";
 
-type ThemeContextValue = {
+interface ThemeContextValue {
   resolvedTheme: Theme;
   setTheme: (theme: Theme) => void;
   theme: Theme;
-};
+}
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() =>
-    window.localStorage.getItem("theme") === "light" ? "light" : "dark",
+    window.localStorage.getItem("theme") === "light" ? "light" : "dark"
   );
 
   useLayoutEffect(() => {
@@ -30,7 +30,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({ resolvedTheme: theme, setTheme, theme }),
-    [theme],
+    [theme]
   );
 
   return (
@@ -41,7 +41,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme(): ThemeContextValue {
   const value = useContext(ThemeContext);
 
-  if (!value) throw new Error("useTheme must be used within ThemeProvider");
+  if (!value) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
 
   return value;
 }

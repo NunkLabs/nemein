@@ -1,68 +1,78 @@
-import { Fragment, useState } from "react";
+import { buttonVariants } from "components/ui/Button";
 import { AnimatePresence, m } from "framer-motion";
 
 import { useGameStore } from "libs/Store";
-import { buttonVariants } from "components/ui/Button";
+import { useCallback, useState } from "react";
 import OptionsPanel from "./Options";
+
+const noop = () => null;
 
 export default function StartPanel({ startGame }: { startGame: () => void }) {
   const gameLoadStates = useGameStore((state) => state.gameLoadStates);
   const updateGameLoadStates = useGameStore(
-    (state) => state.updateGameLoadStates,
+    (state) => state.updateGameLoadStates
   );
 
   const [presence, setPresence] = useState<boolean>(true);
 
+  const handleLoadingExitComplete = useCallback(() => {
+    setPresence(false);
+
+    startGame();
+  }, [startGame]);
+
+  const handleInitialLoadComplete = useCallback(
+    () => updateGameLoadStates({ initialLoad: false }),
+    [updateGameLoadStates]
+  );
+
+  const handleStartClick = useCallback(
+    () => updateGameLoadStates({ gameRequest: true }),
+    [updateGameLoadStates]
+  );
+
   return (
     presence && (
-      <div className="fixed left-1/2 top-1/2 z-50 flex h-32 translate-x-[-50%] translate-y-[-50%] flex-col gap-y-2 text-center">
+      <div className="fixed top-1/2 left-1/2 z-50 flex h-32 translate-x-[-50%] translate-y-[-50%] flex-col gap-y-2 text-center">
         {gameLoadStates.gameRequest ? (
           /**
            * We don't need the enter animation handling because the static
            * header is our placeholder until we need this loading animation.
            */
-          <AnimatePresence
-            onExitComplete={() => {
-              setPresence(false);
-
-              startGame();
-            }}
-          >
-            {(!gameLoadStates.gameStage || !gameLoadStates.gameSocket) && (
-              <Fragment>
-                <m.div
-                  className="flex flex-row text-5xl"
-                  key="start-panel-loading-header"
-                  exit={{ opacity: 0 }}
-                >
-                  {Array.from("nemein").map((letter, index) => (
-                    <m.span
-                      initial="initial"
-                      animate="animate"
-                      variants={{
-                        /**
-                         * Raises y position by 15px and shifts the opacity of
-                         * each letter sequentially to create a wave effect
-                         */
-                        animate: () => ({
-                          opacity: [0.25, 1, 0.25],
-                          y: [0, -10, 0],
-                          transition: {
-                            duration: 1,
-                            delay: index * 0.2,
-                            ease: "easeInOut",
-                            repeat: Infinity,
-                            repeatDelay: 1.5,
-                          },
-                        }),
-                      }}
-                      key={`start-panel-loading-${index}`}
-                    >
-                      {letter}
-                    </m.span>
-                  ))}
-                </m.div>
-              </Fragment>
+          <AnimatePresence onExitComplete={handleLoadingExitComplete}>
+            {!(gameLoadStates.gameStage && gameLoadStates.gameSocket) && (
+              <m.div
+                className="flex flex-row text-5xl"
+                exit={{ opacity: 0 }}
+                key="start-panel-loading-header"
+              >
+                {Array.from("nemein").map((letter, index) => (
+                  <m.span
+                    animate="animate"
+                    initial="initial"
+                    key={`start-panel-loading-${index}`}
+                    variants={{
+                      /**
+                       * Raises y position by 15px and shifts the opacity of
+                       * each letter sequentially to create a wave effect
+                       */
+                      animate: () => ({
+                        opacity: [0.25, 1, 0.25],
+                        transition: {
+                          delay: index * 0.2,
+                          duration: 1,
+                          ease: "easeInOut",
+                          repeat: Number.POSITIVE_INFINITY,
+                          repeatDelay: 1.5,
+                        },
+                        y: [0, -10, 0],
+                      }),
+                    }}
+                  >
+                    {letter}
+                  </m.span>
+                ))}
+              </m.div>
             )}
           </AnimatePresence>
         ) : (
@@ -72,18 +82,16 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
            * a placeholder for the loading header.
            */
           <m.div
+            animate={{ opacity: 1 }}
             className="text-5xl"
             id="start-panel-static-header"
             initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            onAnimationComplete={() =>
-              updateGameLoadStates({ initialLoad: false })
-            }
+            onAnimationComplete={handleInitialLoadComplete}
           >
             nemein
           </m.div>
         )}
-        <AnimatePresence onExitComplete={() => null}>
+        <AnimatePresence onExitComplete={noop}>
           {!gameLoadStates.gameRequest && (
             /**
              * The enter animation sequence offsets the components -10px
@@ -97,40 +105,40 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
              *
              *   options button > start button > static/loading header
              */
-            <Fragment>
+            <>
               <m.button
+                animate={{
+                  opacity: 1,
+                  transition: { delay: 0.05, type: "spring" },
+                  y: 0,
+                }}
                 className={`${buttonVariants({
                   variant: "default",
                 })} place-self-center`}
-                key="start-panel-start"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  transition: { delay: 0.05, type: "spring" },
-                }}
                 exit={{ opacity: 0, transition: { delay: 0.05 } }}
+                initial={{ opacity: 0, y: -10 }}
+                key="start-panel-start"
+                onClick={handleStartClick}
+                type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => updateGameLoadStates({ gameRequest: true })}
-                type="button"
               >
                 Play
               </m.button>
               <m.div
-                className="place-self-center"
-                key="start-panel-options"
-                initial={{ opacity: 0, y: -10 }}
                 animate={{
                   opacity: 1,
-                  y: 0,
                   transition: { delay: 0.1, type: "spring" },
+                  y: 0,
                 }}
+                className="place-self-center"
                 exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: -10 }}
+                key="start-panel-options"
               >
                 <OptionsPanel />
               </m.div>
-            </Fragment>
+            </>
           )}
         </AnimatePresence>
       </div>

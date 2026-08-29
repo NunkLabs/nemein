@@ -2,11 +2,12 @@ import tailwindcssAnimate from "tailwindcss-animate";
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],
   content: {
-    relative: true,
     files: ["./index.html", "./**/*.{ts,tsx}"],
+    relative: true,
   },
+  darkMode: ["class"],
+  plugins: [tailwindcssAnimate],
   theme: {
     container: {
       center: true,
@@ -16,6 +17,10 @@ export default {
       },
     },
     extend: {
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
       fontFamily: {
         montserrat: ['"Montserrat Variable"', '"Montserrat"', "sans-serif"],
         sans: ['"Montserrat Variable"', '"Montserrat"', "sans-serif"],
@@ -30,11 +35,6 @@ export default {
           to: { height: 0 },
         },
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
     },
   },
-  plugins: [tailwindcssAnimate],
 };

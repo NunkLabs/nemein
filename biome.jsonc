@@ -1,0 +1,76 @@
+{
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/vitest"
+  ],
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "style": {
+        // Enums are the shared server/client protocol vocabulary; replacing them changes the exported types.
+        "noEnum": { "level": "off" },
+        // Modules ship as PascalCase here; renaming them would churn every import for no behavior gain.
+        "useFilenamingConvention": { "level": "off" }
+      }
+    }
+  },
+  "overrides": [
+    {
+      // Board scans, the game loop and the Pixi sprite pass are inherently branchy; splitting them
+      // is an architecture change, not a lint fix.
+      "includes": [
+        "src/core/**",
+        "src/web/components/game/Stage.tsx",
+        "test/**"
+      ],
+      "linter": {
+        "rules": {
+          "complexity": { "noExcessiveCognitiveComplexity": { "level": "off" } }
+        }
+      }
+    },
+    {
+      // Classic.linesCleared and Nemein.isTspin are parked signals kept for the game work tracked in
+      // .scratch/nemein-core-bugs; this checkpoint only swaps the linter.
+      "includes": ["src/core/classic/Classic.ts", "src/core/nemein/Nemein.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedPrivateClassMembers": { "level": "off" }
+          }
+        }
+      }
+    },
+    {
+      // Biome's CSS parser does not know Tailwind's at-rules.
+      "includes": ["**/*.css"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noUnknownAtRules": { "level": "off" } }
+        }
+      }
+    },
+    {
+      // Biome types useRef holders as permanently null and flags the real runtime guards around them.
+      "includes": ["src/web/App.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noUnnecessaryConditions": { "level": "off" } }
+        }
+      }
+    },
+    {
+      // Board, hold, queue and loading-letter lists are fixed positional grids: the index IS the identity.
+      "includes": [
+        "src/web/components/game/Stage.tsx",
+        "src/web/components/panels/Start.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": { "noArrayIndexKey": { "level": "off" } }
+        }
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import autoprefixer from "autoprefixer";
 import tailwindcss from "tailwindcss";
 
 const tailwindConfig = fileURLToPath(
-  new URL("./tailwind.config.js", import.meta.url),
+  new URL("./tailwind.config.js", import.meta.url)
 );
 
 export default {

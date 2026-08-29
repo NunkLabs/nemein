@@ -1,54 +1,54 @@
 import EventEmitter from "eventemitter3";
 
-import { GameStates } from "./Store";
+import type { GameStates } from "./Store";
 
 export enum Opcodes {
   /* Base socket events */
-  SOCKET_OPEN,
-  SOCKET_READY,
-  SOCKET_PING,
-  SOCKET_HEARTBEAT,
+  SOCKET_OPEN = 0,
+  SOCKET_READY = 1,
+  SOCKET_PING = 2,
+  SOCKET_HEARTBEAT = 3,
 
   /* Game events */
-  GAME_KEYDOWN,
-  GAME_STATES,
-  GAME_TOGGLE,
+  GAME_KEYDOWN = 4,
+  GAME_STATES = 5,
+  GAME_TOGGLE = 6,
 }
 
-type SocketOpen = {
+interface SocketOpen {
+  data: number;
   op: Opcodes.SOCKET_OPEN;
-  data: number;
-};
+}
 
-type SocketReady = {
-  op: Opcodes.SOCKET_READY;
+interface SocketReady {
   data: "classic" | "nemein";
-};
+  op: Opcodes.SOCKET_READY;
+}
 
-type SocketPing = {
+interface SocketPing {
+  data: number;
   op: Opcodes.SOCKET_PING;
-  data: number;
-};
+}
 
-type SocketHeartbeat = {
+interface SocketHeartbeat {
+  data: number;
   op: Opcodes.SOCKET_HEARTBEAT;
-  data: number;
-};
+}
 
-type SocketGameKeydown = {
-  op: Opcodes.GAME_KEYDOWN;
+interface SocketGameKeydown {
   data: string;
-};
+  op: Opcodes.GAME_KEYDOWN;
+}
 
-type SocketGameStates = {
-  op: Opcodes.GAME_STATES;
+interface SocketGameStates {
   data: GameStates;
-};
+  op: Opcodes.GAME_STATES;
+}
 
-type SocketGameToggle = {
-  op: Opcodes.GAME_TOGGLE;
+interface SocketGameToggle {
   data: boolean;
-};
+  op: Opcodes.GAME_TOGGLE;
+}
 
 type SocketData =
   | SocketOpen
@@ -85,8 +85,10 @@ export class GameSocket extends EventEmitter {
    * @brief: init: This function initializes a new Tetris client socket by
    * setting up socket events and forwarding them to the Tetris React component.
    */
-  async init() {
-    if (this.socket) return;
+  init() {
+    if (this.socket) {
+      return;
+    }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
@@ -118,9 +120,9 @@ export class GameSocket extends EventEmitter {
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
               this.socket.send(
                 JSON.stringify({
-                  op: Opcodes.SOCKET_PING,
                   data: Date.now(),
-                }),
+                  op: Opcodes.SOCKET_PING,
+                })
               );
             }
           }, PING_INTERVAL_MS);
@@ -134,7 +136,7 @@ export class GameSocket extends EventEmitter {
         }
 
         default:
-          this.emit("data", { op, data });
+          this.emit("data", { data, op });
       }
     };
   }
@@ -144,7 +146,9 @@ export class GameSocket extends EventEmitter {
    * by clearing the heartbeat interval timer and closing the connection.
    */
   destroy() {
-    if (!this.socket) return;
+    if (!this.socket) {
+      return;
+    }
 
     if (this.heartbeat !== null) {
       clearInterval(this.heartbeat);
@@ -164,7 +168,9 @@ export class GameSocket extends EventEmitter {
    * @param:   {SocketData}   data   Data to send to the server
    */
   send(data: SocketData) {
-    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
 
     this.socket.send(JSON.stringify(data));
   }
@@ -185,7 +191,7 @@ export class GameSocket extends EventEmitter {
       if (duration >= 0) {
         this.heartbeat = window.setInterval(
           this.setHeartbeat.bind(this),
-          duration,
+          duration
         );
       }
 
@@ -193,8 +199,8 @@ export class GameSocket extends EventEmitter {
     }
 
     this.send({
-      op: Opcodes.SOCKET_HEARTBEAT,
       data: Date.now(),
+      op: Opcodes.SOCKET_HEARTBEAT,
     });
   }
 }

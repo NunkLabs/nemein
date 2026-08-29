@@ -1,24 +1,22 @@
+import logger from "../../utils/Logger.js";
 import {
-  Y_START,
-  DEFAULT_BOARD_WIDTH,
+  type ClearRecord,
   DEFAULT_BOARD_HEIGHT,
+  DEFAULT_BOARD_WIDTH,
   NemeinBoard,
-  NemeinCol,
-  ClearRecord,
+  type NemeinCol,
+  Y_START,
 } from "./Board.js";
-
 import {
+  DEFAULT_TEST_OVERWRITTEN_TETROMINO,
+  type Tetromino,
+  TetrominoManager,
+  TetrominoRotateDirection,
+  TetrominoRotation,
+  TetrominoType,
   X_INDEX,
   Y_INDEX,
-  DEFAULT_TEST_OVERWRITTEN_TETROMINO,
-  TetrominoType,
-  TetrominoRotation,
-  TetrominoManager,
-  Tetromino,
-  TetrominoRotateDirection,
 } from "./TetrominoManager.js";
-
-import logger from "../../utils/Logger.js";
 
 /* Keyboard event consts */
 export const ARROW_DOWN = "ArrowDown";
@@ -58,14 +56,14 @@ export const DEFAULT_NUM_TICKS_PER_GREY_LINE_SPAWNED = 10;
 
 /* Enum types */
 export enum NemeinCommand {
-  Left,
-  Right,
-  ClockwiseRotate,
-  CounterclockwiseRotate,
-  TickDown,
-  Down,
-  HardDrop,
-  HoldTetromino,
+  Left = 0,
+  Right = 1,
+  ClockwiseRotate = 2,
+  CounterclockwiseRotate = 3,
+  TickDown = 4,
+  Down = 5,
+  HardDrop = 6,
+  HoldTetromino = 7,
 }
 export enum LineValue {
   None = 0,
@@ -75,25 +73,25 @@ export enum LineValue {
   Tetris = 4,
 }
 
-export type NemeinStates = {
-  type: "nemein";
-  corX: number;
-  corY: number;
-  ghostCorY: number;
-  heldTetromino: TetrominoType;
+export interface NemeinStates {
   activeTetromino: TetrominoType;
   activeTetrominoRotate: TetrominoRotation;
-  spawnedTetrominos: TetrominoType[];
-  gameField: NemeinCol[];
   clearRecordsArr: ClearRecord[];
-  gameOver: boolean;
+  corX: number;
+  corY: number;
+  gameField: NemeinCol[];
   gameInterval: number;
-};
+  gameOver: boolean;
+  ghostCorY: number;
+  heldTetromino: TetrominoType;
+  spawnedTetrominos: TetrominoType[];
+  type: "nemein";
+}
 
 export class Nemein {
-  private boardWidth: number;
+  private readonly boardWidth: number;
 
-  private board: NemeinBoard;
+  private readonly board: NemeinBoard;
 
   private onHold: boolean;
 
@@ -104,7 +102,7 @@ export class Nemein {
 
   private ghostCorY: number;
 
-  private tetrominoManager: TetrominoManager;
+  private readonly tetrominoManager: TetrominoManager;
 
   private initRender: boolean;
 
@@ -125,7 +123,7 @@ export class Nemein {
     boardHeight: number = DEFAULT_BOARD_HEIGHT,
     dbgOverwrittenTetromino: Tetromino = DEFAULT_TEST_OVERWRITTEN_TETROMINO,
     /* TBS-86: This is only for testing lock-delay */
-    dbgOverwriteTimer: boolean = false,
+    dbgOverwriteTimer = false
   ) {
     this.boardWidth = boardWidth;
     this.board = new NemeinBoard(boardWidth, boardHeight);
@@ -157,7 +155,7 @@ export class Nemein {
     const activeTetromino = this.tetrominoManager.getActiveTetromino();
     this.ghostCorY = this.board.prepareGhostTetrominoY(
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
   }
 
@@ -167,7 +165,7 @@ export class Nemein {
    * @param rotateDirection - Direction to rotate
    */
   private handleRotation(
-    rotateDirection: TetrominoRotateDirection = TetrominoRotateDirection.Clockwise,
+    rotateDirection: TetrominoRotateDirection = TetrominoRotateDirection.Clockwise
   ): void {
     const activeTetromino = this.tetrominoManager.getActiveTetromino();
 
@@ -189,14 +187,9 @@ export class Nemein {
     const testOffsetArr = TetrominoManager.getTetrominoWallKickOffsets(
       activeTetromino.type,
       activeTetromino.rotation,
-      rotateDirection,
+      rotateDirection
     );
-    for (
-      let testOffsetIdx = 0;
-      testOffsetIdx < testOffsetArr.length;
-      testOffsetIdx += 1
-    ) {
-      const testOffset = testOffsetArr[testOffsetIdx];
+    for (const testOffset of testOffsetArr) {
       const testCorX = this.corX + testOffset[X_INDEX];
       const testCorY = this.corY + testOffset[Y_INDEX];
 
@@ -210,7 +203,7 @@ export class Nemein {
           testCorX,
           testCorY,
           activeTetromino.type,
-          testRotate,
+          testRotate
         )
       ) {
         /**
@@ -230,14 +223,14 @@ export class Nemein {
               this.corX + 1,
               this.corY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             ) ||
             this.board.isTetrominoRenderable(
               false,
               this.corX - 1,
               this.corY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             );
           this.isTspin = !isAbleToMoveHorizontally;
         }
@@ -246,8 +239,8 @@ export class Nemein {
         this.corX = testCorX;
         this.corY = testCorY;
         const newActiveTetromino: Tetromino = {
-          type: activeTetromino.type,
           rotation: testRotate,
+          type: activeTetromino.type,
         };
         this.tetrominoManager.setActiveTetromino(newActiveTetromino);
         break;
@@ -269,7 +262,7 @@ export class Nemein {
       this.corX,
       this.corY,
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
 
     /* Prepare new tetromino for the next board update */
@@ -280,7 +273,7 @@ export class Nemein {
       this.corX,
       this.corY,
       activeTetromino.type,
-      activeTetromino.rotation,
+      activeTetromino.rotation
     );
     this.onHold = false;
 
@@ -297,7 +290,7 @@ export class Nemein {
         this.corX,
         this.corY,
         activeTetromino.type,
-        activeTetromino.rotation,
+        activeTetromino.rotation
       )
     ) {
       this.gameOver = true;
@@ -315,9 +308,7 @@ export class Nemein {
    * we simply return the current game states without making any changes
    * @return: Updated game states
    */
-  public updateNemeinStates(
-    command: NemeinCommand | null = null,
-  ): NemeinStates {
+  updateNemeinStates(command: NemeinCommand | null = null): NemeinStates {
     let activeTetromino = this.tetrominoManager.getActiveTetromino();
     if (command !== null && !this.gameOver) {
       /* Handling init - We only render the newly spawned tetromino */
@@ -327,14 +318,14 @@ export class Nemein {
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Ghost,
+          TetrominoType.Ghost
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          activeTetromino.type,
+          activeTetromino.type
         );
         this.initRender = false;
       } else {
@@ -347,14 +338,14 @@ export class Nemein {
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Blank,
+          TetrominoType.Blank
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Blank,
+          TetrominoType.Blank
         );
 
         let yAddValid = true;
@@ -372,7 +363,7 @@ export class Nemein {
                 testCorX,
                 this.corY,
                 activeTetromino.type,
-                activeTetromino.rotation,
+                activeTetromino.rotation
               )
             ) {
               this.corX = testCorX;
@@ -388,7 +379,7 @@ export class Nemein {
                 testCorX,
                 this.corY,
                 activeTetromino.type,
-                activeTetromino.rotation,
+                activeTetromino.rotation
               )
             ) {
               this.corX = testCorX;
@@ -403,28 +394,29 @@ export class Nemein {
             this.handleRotation(TetrominoRotateDirection.Counterclockwise);
             break;
           }
-          case NemeinCommand.TickDown: {
-            /**
-             * This command is technically Command.Down but with the addition for
-             * increasing the number of ticks and spawning challenge lines
-             * if certain ticks conditions are met
-             */
-            this.numTicks =
-              (this.numTicks + 1) % DEFAULT_NUM_TICKS_PER_GREY_LINE_SPAWNED;
-            if (this.numTicks === 0) {
-              this.board.spawnChallengeLine();
-              this.corY -= 1;
-            }
-            /* Fallthrough */
-          }
+          case NemeinCommand.TickDown:
+          /**
+           * This command is technically Command.Down but with the addition for
+           * increasing the number of ticks and spawning challenge lines
+           * if certain ticks conditions are met
+           */
           case NemeinCommand.Down: {
+            if (command === NemeinCommand.TickDown) {
+              this.numTicks =
+                (this.numTicks + 1) % DEFAULT_NUM_TICKS_PER_GREY_LINE_SPAWNED;
+              if (this.numTicks === 0) {
+                this.board.spawnChallengeLine();
+                this.corY -= 1;
+              }
+            }
+
             testCorY = this.corY + 1;
             yAddValid = this.board.isTetrominoRenderable(
               false,
               this.corX,
               testCorY,
               activeTetromino.type,
-              activeTetromino.rotation,
+              activeTetromino.rotation
             );
             if (yAddValid) {
               /* If lock-delay was enabled, getting here means that the user
@@ -474,21 +466,21 @@ export class Nemein {
           this.corX,
           this.corY,
           activeTetromino.type,
-          activeTetromino.rotation,
+          activeTetromino.rotation
         );
         this.board.renderTetromino(
           this.corX,
           this.ghostCorY,
           activeTetromino.type,
           activeTetromino.rotation,
-          TetrominoType.Ghost,
+          TetrominoType.Ghost
         );
         this.board.renderTetromino(
           this.corX,
           this.corY,
           activeTetromino.type,
           activeTetromino.rotation,
-          activeTetromino.type,
+          activeTetromino.type
         );
 
         /**
@@ -528,20 +520,20 @@ export class Nemein {
     logger.debug(`[Nemein] This tick's interval: ${this.gameInterval}ms`);
 
     return {
-      type: "nemein",
-      corX: this.corX,
-      corY: this.corY,
-      ghostCorY: this.ghostCorY,
-      heldTetromino: this.tetrominoManager.getHeldTetromino().type,
       activeTetromino: activeTetromino.type,
       activeTetrominoRotate: activeTetromino.rotation,
-      gameField: this.board.getGameField(),
       clearRecordsArr: this.board.getClearRecords(),
+      corX: this.corX,
+      corY: this.corY,
+      gameField: this.board.getGameField(),
+      gameInterval: this.gameInterval,
+      gameOver: this.gameOver,
+      ghostCorY: this.ghostCorY,
+      heldTetromino: this.tetrominoManager.getHeldTetromino().type,
       spawnedTetrominos: <TetrominoType[]>(
         this.tetrominoManager.getSpawnedTetrominos(true)
       ),
-      gameOver: this.gameOver,
-      gameInterval: this.gameInterval,
+      type: "nemein",
     };
   }
 
@@ -552,7 +544,7 @@ export class Nemein {
    * @param: event - The keyboard event received
    * @return: Updated game states
    */
-  public inputHandle(key: string): NemeinStates {
+  inputHandle(key: string): NemeinStates {
     let retCommand: NemeinCommand = NemeinCommand.Down;
     switch (key) {
       case NUMPAD_4:
@@ -607,5 +599,3 @@ export class Nemein {
     return this.updateNemeinStates(retCommand);
   }
 }
-
-export default Nemein;
