@@ -16,40 +16,43 @@ import {
 } from "components/ui/Select";
 import { Switch } from "components/ui/Switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "components/ui/Tabs";
+import { toast } from "components/ui/Toast";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "components/ui/Tooltip";
-import { useToast } from "components/ui/UseToast";
 import { m } from "framer-motion";
 import { useGameStore } from "libs/Store";
 import { useCallback, useEffect } from "react";
 import { useTheme } from "@/theme";
 
-export default function OptionsPanel() {
+export default function SettingsPanel() {
   const gameOptions = useGameStore((state) => state.gameOptions);
   const updateGameOptions = useGameStore((state) => state.updateGameOptions);
   const updateGameTheme = useGameStore((state) => state.updateGameTheme);
 
   const { resolvedTheme, setTheme } = useTheme();
-  const { toast } = useToast();
 
   const handleGameModeChange = useCallback(
-    (gameModeSelection: typeof gameOptions.gameMode) => {
+    (gameModeSelection: typeof gameOptions.gameMode | null) => {
+      if (gameModeSelection === null) {
+        return;
+      }
+
       updateGameOptions({
         gameMode: gameModeSelection,
       });
 
-      toast({
+      toast.add({
         description: `
           ${gameModeSelection} will now launch on your next game
         `,
         title: "Game mode changed!",
       });
     },
-    [toast, updateGameOptions]
+    [updateGameOptions]
   );
 
   const handlePerformanceDisplayChange = useCallback(
@@ -74,10 +77,15 @@ export default function OptionsPanel() {
   );
 
   const handlePowerPreferenceChange = useCallback(
-    (powerPreferenceSelection: typeof gameOptions.powerPreference) =>
+    (powerPreferenceSelection: typeof gameOptions.powerPreference | null) => {
+      if (powerPreferenceSelection === null) {
+        return;
+      }
+
       updateGameOptions({
         powerPreference: powerPreferenceSelection,
-      }),
+      });
+    },
     [updateGameOptions]
   );
 
@@ -100,15 +108,17 @@ export default function OptionsPanel() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <m.button
-          className={buttonVariants({ variant: "secondary" })}
-          type="button"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Options
-        </m.button>
+      <DialogTrigger
+        render={
+          <m.button
+            className={buttonVariants({ variant: "secondary" })}
+            type="button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          />
+        }
+      >
+        Settings
       </DialogTrigger>
       <DialogContent>
         <Tabs defaultValue="general">
@@ -119,9 +129,9 @@ export default function OptionsPanel() {
           </TabsList>
           <TabsContent value="general">
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">Game Mode</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">Game Mode</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Select the preferred game mode
                 </p>
               </div>
@@ -129,16 +139,16 @@ export default function OptionsPanel() {
                 <SelectTrigger className="w-44">
                   <SelectValue placeholder={gameOptions.gameMode} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent alignItemWithTrigger={false}>
                   <SelectItem value="classic">classic</SelectItem>
                   <SelectItem value="nemein">nemein</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">Performance Display</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">Performance Display</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Show latency and frame rate
                 </p>
               </div>
@@ -148,9 +158,9 @@ export default function OptionsPanel() {
               />
             </div>
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">Dark Mode</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">Dark Mode</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Embrace the dark
                 </p>
               </div>
@@ -162,9 +172,9 @@ export default function OptionsPanel() {
           </TabsContent>
           <TabsContent value="graphics">
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">Antialiasing</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">Antialiasing</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Smooth out block edges
                 </p>
               </div>
@@ -174,22 +184,22 @@ export default function OptionsPanel() {
               />
             </div>
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">GPU Mode</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">GPU Mode</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Change the WebGL GPU power preference
                 </p>
               </div>
-              <TooltipProvider>
+              <TooltipProvider delay={700}>
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger render={<span className="inline-flex" />}>
                     <Select onValueChange={handlePowerPreferenceChange}>
                       <SelectTrigger className="w-44">
                         <SelectValue
                           placeholder={gameOptions.powerPreference}
                         />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent alignItemWithTrigger={false}>
                         <SelectItem value="default">default</SelectItem>
                         <SelectItem value="high-performance">
                           high performance
@@ -211,9 +221,9 @@ export default function OptionsPanel() {
           </TabsContent>
           <TabsContent value="accessibility">
             <div className="flex flex-row items-center justify-between p-3">
-              <div className="space-y-1">
-                <Label className="text-base">Stage Shake</Label>
-                <p className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="flex flex-col gap-1">
+                <Label className="text-sm">Stage Shake</Label>
+                <p className="text-gray-600 text-xs dark:text-gray-300">
                   Toggle the shake effect on line clear
                 </p>
               </div>
@@ -224,9 +234,9 @@ export default function OptionsPanel() {
             </div>
           </TabsContent>
         </Tabs>
-        <DialogFooter>
-          <DialogClose className={buttonVariants({ variant: "default" })}>
-            Close
+        <DialogFooter className="sm:justify-center">
+          <DialogClose className={buttonVariants({ variant: "secondary" })}>
+            Confirm
           </DialogClose>
         </DialogFooter>
       </DialogContent>

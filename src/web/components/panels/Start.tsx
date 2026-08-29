@@ -3,7 +3,7 @@ import { AnimatePresence, m } from "framer-motion";
 
 import { useGameStore } from "libs/Store";
 import { useCallback, useState } from "react";
-import OptionsPanel from "./Options";
+import SettingsPanel from "./Settings";
 
 const noop = () => null;
 
@@ -33,7 +33,7 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
 
   return (
     presence && (
-      <div className="fixed top-1/2 left-1/2 z-50 flex h-32 translate-x-[-50%] translate-y-[-50%] flex-col gap-y-2 text-center">
+      <div className="fixed top-1/2 left-1/2 z-50 flex h-32 -translate-x-1/2 -translate-y-1/2 flex-col gap-y-2 text-center">
         {gameLoadStates.gameRequest ? (
           /**
            * We don't need the enter animation handling because the static
@@ -99,11 +99,11 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
              * lifelike effect. A delays of 0.05 second is added between each
              * components to create the enter order:
              *
-             *   static header > start button > options button
+             *   static header > start button > settings button
              *
              * The exit order is reversed:
              *
-             *   options button > start button > static/loading header
+             *   settings button > start button > static/loading header
              */
             <>
               <m.button
@@ -134,9 +134,9 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
                 className="place-self-center"
                 exit={{ opacity: 0 }}
                 initial={{ opacity: 0, y: -10 }}
-                key="start-panel-options"
+                key="start-panel-settings"
               >
-                <OptionsPanel />
+                <SettingsPanel />
               </m.div>
             </>
           )}

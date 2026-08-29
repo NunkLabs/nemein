@@ -1,4 +1,4 @@
-import { Toaster } from "components/ui/Toaster";
+import { Toaster } from "components/ui/Toast";
 import ReactDOM from "react-dom/client";
 
 import App from "./App";

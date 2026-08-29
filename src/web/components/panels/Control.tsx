@@ -27,7 +27,7 @@ export default function ControlPanel({
 
   return (
     presence && (
-      <div className="fixed top-1/2 left-1/2 flex translate-x-[-50%] translate-y-[-50%] flex-col place-items-center gap-y-2 text-center">
+      <div className="fixed top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col place-items-center gap-y-2 text-center">
         <AnimatePresence onExitComplete={handleExitComplete}>
           {(gameStatus === "pausing" || gameStatus === "ending") && (
             /**

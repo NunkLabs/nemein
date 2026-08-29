@@ -1,23 +1,20 @@
-import { Root as LabelRoot } from "@radix-ui/react-label";
-import { cva, type VariantProps } from "class-variance-authority";
+"use client";
+
 import { cn } from "libs/Utils";
-import {
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  forwardRef,
-} from "react";
+import type * as React from "react";
 
-const labelVariants = cva(
-  "font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-);
-
-const Label = forwardRef<
-  ElementRef<typeof LabelRoot>,
-  ComponentPropsWithoutRef<typeof LabelRoot> &
-    VariantProps<typeof labelVariants>
->(({ className, ...props }, ref) => (
-  <LabelRoot className={cn(labelVariants(), className)} ref={ref} {...props} />
-));
-Label.displayName = LabelRoot.displayName;
+function Label({ className, ...props }: React.ComponentProps<"label">) {
+  return (
+    // biome-ignore lint/a11y/noLabelWithoutControl: generic primitive - the caller owns htmlFor or nesting
+    <label
+      className={cn(
+        "flex select-none items-center gap-2 font-semibold text-xs uppercase tracking-wide peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-data-[slot=checkbox]:font-normal peer-data-[slot=radio-group-item]:font-normal peer-data-[slot=switch]:font-normal peer-data-[slot=checkbox]:text-sm peer-data-[slot=radio-group-item]:text-sm peer-data-[slot=switch]:text-sm peer-data-[slot=checkbox]:normal-case peer-data-[slot=radio-group-item]:normal-case peer-data-[slot=switch]:normal-case peer-data-[slot=checkbox]:tracking-normal peer-data-[slot=radio-group-item]:tracking-normal peer-data-[slot=switch]:tracking-normal",
+        className
+      )}
+      data-slot="label"
+      {...props}
+    />
+  );
+}
 
 export { Label };

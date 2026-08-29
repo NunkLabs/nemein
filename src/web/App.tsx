@@ -208,7 +208,7 @@ export default function Nemein() {
       {gameLoadStates.initialLoad ? (
         /* Acts as a placeholder while waiting for the start panel */
         <div
-          className="fixed top-1/2 left-1/2 h-32 translate-x-[-50%] translate-y-[-50%] animate-pulse text-center text-5xl"
+          className="fixed top-1/2 left-1/2 h-32 -translate-x-1/2 -translate-y-1/2 animate-pulse text-center text-5xl"
           id="start-panel-initial-header"
         >
           nemein

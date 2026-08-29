@@ -43,15 +43,6 @@
       }
     },
     {
-      // Biome's CSS parser does not know Tailwind's at-rules.
-      "includes": ["**/*.css"],
-      "linter": {
-        "rules": {
-          "suspicious": { "noUnknownAtRules": { "level": "off" } }
-        }
-      }
-    },
-    {
       // Board, hold, queue and loading-letter lists are fixed positional grids: the index IS the identity.
       "includes": [
         "src/web/components/game/Stage.tsx",
