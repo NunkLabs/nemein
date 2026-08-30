@@ -1,8 +1,8 @@
 import { Container, Stage as PixiStage, Sprite } from "@pixi/react";
-import { AnimatePresence, m } from "framer-motion";
 import { DmgType, TetrominoType, useGameStore } from "libs/Store";
+import { AnimatePresence, m } from "motion/react";
 import { Texture } from "pixi.js";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/theme";
 import BorderGraphics from "./BorderGraphics";
 import ClearedSprite from "./ClearedSprite";

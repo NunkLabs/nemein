@@ -23,8 +23,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "components/ui/Tooltip";
-import { m } from "framer-motion";
 import { useGameStore } from "libs/Store";
+import { m } from "motion/react";
 import { useCallback, useEffect } from "react";
 import { useTheme } from "@/theme";
 

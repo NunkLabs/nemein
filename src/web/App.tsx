@@ -1,7 +1,7 @@
-import type { FeatureBundle } from "framer-motion";
-import { LazyMotion } from "framer-motion";
 import { GameSocket, Opcodes } from "libs/Socket";
 import { useGameStore } from "libs/Store";
+import type { FeatureBundle } from "motion/react";
+import { LazyMotion } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 
 const ControlPanel = lazy(() => import("components/panels/Control"));

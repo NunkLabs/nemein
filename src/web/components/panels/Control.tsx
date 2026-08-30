@@ -1,7 +1,6 @@
 import { buttonVariants } from "components/ui/Button";
-import { AnimatePresence, m } from "framer-motion";
-
 import { useGameStore } from "libs/Store";
+import { AnimatePresence, m } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
 export default function ControlPanel({
