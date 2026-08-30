@@ -3,30 +3,29 @@ name: Main
 on: [push, pull_request]
 
 jobs:
-  lint:
-    name: Node.js
-    runs-on: ubuntu-22.04
+  checks:
+    name: Node.js ${{ matrix.node-version }}
+    runs-on: ubuntu-26.04
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [24, 26]
+        node-version: [26]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - name: Set up pnpm and Node.js ${{ matrix.node-version }}
+        uses: pnpm/setup@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
+          runtime: node@${{ matrix.node-version }}
+          cache: true
+          require-lockfile: true
 
       - name: Run ESLint
         run: pnpm lint
+
+      - name: Build and type-check
+        run: pnpm build
 
       - name: Run Tests
         run: pnpm test
