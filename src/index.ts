@@ -1,11 +1,17 @@
 import type { Server } from "node:http";
+import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
-import { config } from "dotenv";
 
 import { createServer } from "./server.js";
 import logger from "./utils/Logger.js";
 
-config();
+try {
+  loadEnvFile();
+} catch (error) {
+  if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+    throw error;
+  }
+}
 
 const PORT = Number(process.env.PORT) || 8080;
 const isDev = process.env.NODE_ENV === "development";

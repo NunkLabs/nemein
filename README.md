@@ -4,7 +4,7 @@ This repository contains the game server and web client in one unified setup. Th
 
 ## Requirements
 
-- Node.js 18 or newer
+- Node.js 26 or newer
 - [pnpm](https://pnpm.io/installation)
 
 ## Development
