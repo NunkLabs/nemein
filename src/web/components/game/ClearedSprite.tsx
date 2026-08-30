@@ -1,12 +1,12 @@
-import { Sprite, useTick } from "@pixi/react";
+import { useTick } from "@pixi/react";
 import { randomFloatInRange } from "libs/Utils";
-import { Texture } from "pixi.js";
+import type { PointData, Texture } from "pixi.js";
 import { useMemo, useRef, useState } from "react";
 import { GAME_PANEL } from "./Misc";
 
 interface SpriteProperties {
   alpha: number;
-  position: [number, number];
+  position: PointData;
   rotation: number;
   scale: number;
 }
@@ -39,20 +39,19 @@ const MAJORITY_SCALE_CEILING = 0;
 
 export default function ClearedSprite({
   isBlank,
+  texture,
   tint,
   x,
   y,
 }: {
   isBlank?: boolean;
+  texture: Texture;
   tint: number;
   x: number;
   y: number;
 }) {
   const time = useRef<number>(0);
   const progress = useRef<number>(0);
-  const textures = useRef({
-    blank: Texture.from("/textures/blank.svg"),
-  });
 
   const baseProperties = useMemo(
     () => ({
@@ -87,7 +86,7 @@ export default function ClearedSprite({
 
   const [spriteProperties, setSpriteProperties] = useState<SpriteProperties>({
     alpha: 1,
-    position: [x, y],
+    position: { x, y },
     rotation: 0,
     scale: 1,
   });
@@ -106,12 +105,12 @@ export default function ClearedSprite({
    */
   const acceleration = -2 * velocity;
 
-  useTick((_delta, ticker) => {
+  useTick((ticker) => {
     if (time.current > ANIMATION_DURATION_S) {
       /* Resets and ensures the sprite is hidden until it's detached */
       setSpriteProperties({
         alpha: 0,
-        position: [x, y],
+        position: { x, y },
         rotation: 0,
         scale: 1,
       });
@@ -141,7 +140,7 @@ export default function ClearedSprite({
 
     setSpriteProperties({
       alpha: 1 - progress.current,
-      position: [currentXPosition, currentYPosition],
+      position: { x: currentXPosition, y: currentYPosition },
       rotation: progress.current * baseProperties.rotation,
       scale: 1 + progress.current * baseProperties.scale,
     });
@@ -155,13 +154,13 @@ export default function ClearedSprite({
   });
 
   return (
-    <Sprite
+    <pixiSprite
       alpha={isBlank ? 0 : spriteProperties.alpha}
       anchor={SPRITE_ANCHOR}
       height={GAME_PANEL.CHILD * spriteProperties.scale}
       position={spriteProperties.position}
       rotation={spriteProperties.rotation}
-      texture={textures.current.blank}
+      texture={texture}
       tint={tint}
       width={GAME_PANEL.CHILD * spriteProperties.scale}
     />

@@ -16,6 +16,10 @@ import type * as React from "react";
 
 const toast = ToastPrimitive.createToastManager();
 
+/* Module scope so the React Compiler can optimize these two components */
+const TOAST_ACTION_RENDER = <Button size="sm" variant="outline" />;
+const TOAST_CLOSE_RENDER = <Button size="icon-sm" variant="ghost" />;
+
 function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
   return <ToastPrimitive.Provider {...props} />;
 }
@@ -102,7 +106,7 @@ function ToastDescription({
 
 function ToastAction({
   className,
-  render = <Button size="sm" variant="outline" />,
+  render = TOAST_ACTION_RENDER,
   ...props
 }: ToastPrimitive.Action.Props) {
   return (
@@ -118,7 +122,7 @@ function ToastAction({
 function ToastClose({
   className,
   children,
-  render = <Button size="icon-sm" variant="ghost" />,
+  render = TOAST_CLOSE_RENDER,
   ...props
 }: ToastPrimitive.Close.Props) {
   return (

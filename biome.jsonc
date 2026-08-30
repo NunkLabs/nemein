@@ -8,17 +8,19 @@
   "linter": {
     "rules": {
       "style": {
-        // Enums are the shared server/client protocol vocabulary; replacing them changes the exported types.
+        // Enums are the shared server/client protocol vocabulary; replacing
+        // them changes the exported types.
         "noEnum": { "level": "off" },
-        // Modules ship as PascalCase here; renaming them would churn every import for no behavior gain.
+        // Modules ship as PascalCase here; renaming them would churn every
+        // import for no behavior gain.
         "useFilenamingConvention": { "level": "off" }
       }
     }
   },
   "overrides": [
     {
-      // Board scans, the game loop and the Pixi sprite pass are inherently branchy; splitting them
-      // is an architecture change, not a lint fix.
+      // Board scans, the game loop and the Pixi sprite pass are inherently
+      // branchy; splitting them is an architecture change, not a lint fix.
       "includes": [
         "src/core/**",
         "src/web/components/game/Stage.tsx",
@@ -26,12 +28,15 @@
       ],
       "linter": {
         "rules": {
-          "complexity": { "noExcessiveCognitiveComplexity": { "level": "off" } }
+          "complexity": {
+            "noExcessiveCognitiveComplexity": { "level": "off" }
+          }
         }
       }
     },
     {
-      // Classic.linesCleared and Nemein.isTspin are parked signals kept for the game work tracked in
+      // Classic.linesCleared and Nemein.isTspin are parked signals kept for the
+      // game work tracked in
       // .scratch/nemein-core-bugs; this checkpoint only swaps the linter.
       "includes": ["src/core/classic/Classic.ts", "src/core/nemein/Nemein.ts"],
       "linter": {
@@ -51,6 +56,23 @@
       "linter": {
         "rules": {
           "suspicious": { "noArrayIndexKey": { "level": "off" } }
+        }
+      }
+    },
+    {
+      // pixi-prefixed intrinsics are Pixi scene nodes, not DOM elements, so
+      // their props (tint, texture, draw, ...) are meaningless to the DOM
+      // attribute check.
+      "includes": [
+        "src/web/components/game/BorderGraphics.tsx",
+        "src/web/components/game/ClearedSprite.tsx",
+        "src/web/components/game/DamageSprite.tsx",
+        "src/web/components/game/PerformanceTracker.tsx",
+        "src/web/components/game/Stage.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": { "noUnknownAttribute": { "level": "off" } }
         }
       }
     }

@@ -1,7 +1,8 @@
-import { Container, Stage as PixiStage, Sprite } from "@pixi/react";
+import { Application } from "@pixi/react";
+import { type GameTextures, loadGameTextures } from "libs/Pixi";
 import { DmgType, TetrominoType, useGameStore } from "libs/Store";
 import { AnimatePresence, m } from "motion/react";
-import { Texture } from "pixi.js";
+import type { PointData } from "pixi.js";
 import { type JSX, useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "@/theme";
 import BorderGraphics from "./BorderGraphics";
@@ -21,11 +22,11 @@ import {
 import PerformanceTracker from "./PerformanceTracker";
 
 const SCREEN_SHAKE_INTERVAL_MS = 10;
-const SCREEN_SHAKE_OFFSETS: [number, number][] = [
-  [0, 0],
-  [-10, -10],
-  [10, 10],
-  [0, 0],
+const SCREEN_SHAKE_OFFSETS: PointData[] = [
+  { x: 0, y: 0 },
+  { x: -10, y: -10 },
+  { x: 10, y: 10 },
+  { x: 0, y: 0 },
 ];
 
 const noop = () => null;
@@ -41,22 +42,29 @@ function Stage() {
       theme === "light" ? DAMAGE_TYPE_STYLES.LIGHT : DAMAGE_TYPE_STYLES.DARK,
     tetrominoColor:
       theme === "light" ? TETROMINO_STYLES.LIGHT : TETROMINO_STYLES.DARK,
-    texture: {
-      blank: Texture.from("/textures/blank.svg"),
-    },
   });
   const blocksCleared = useRef<number>(0);
   const linesCleared = useRef<number>(0);
 
-  const [stagePosition, setStagePosition] = useState<[number, number]>([0, 0]);
+  const [stagePosition, setStagePosition] = useState<PointData>({ x: 0, y: 0 });
   const [gameSprites, setGameSprites] = useState<JSX.Element[]>([]);
+  const [textures, setTextures] = useState<GameTextures | null>(null);
+
+  /* Pixi 8 initializes asynchronously, so textures load once the app is up */
+  const handleInit = useCallback(() => {
+    loadGameTextures()
+      .then(setTextures)
+      .catch((error: unknown) => {
+        console.error("[Stage]: Failed to load the game textures", error);
+      });
+  }, []);
 
   useEffect(() => {
-    if (!gameStates) {
+    if (!(gameStates && textures)) {
       return;
     }
 
-    const { damageColor, tetrominoColor, texture } = styles.current;
+    const { damageColor, tetrominoColor } = styles.current;
 
     const sprites: JSX.Element[] = [];
 
@@ -71,22 +79,21 @@ function Stage() {
               <ClearedSprite
                 isBlank={tetrominoName === "Blank"}
                 key={`game-over-${colIndex}-${rowIndex}`}
+                texture={textures.blank}
                 tint={tetrominoColor[tetrominoName]}
                 x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
                 y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
               />
             ) : (
-              <Sprite
+              <pixiSprite
                 alpha={row.type === TetrominoType.Ghost ? 0.25 : 1}
                 height={GAME_PANEL.CHILD}
                 key={`game-${colIndex}-${rowIndex}`}
-                position={[
-                  GAME_PANEL.X + GAME_PANEL.CHILD * colIndex,
-                  GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex,
-                ]}
-                texture={texture.blank}
+                texture={textures.blank}
                 tint={tetrominoColor[tetrominoName]}
                 width={GAME_PANEL.CHILD}
+                x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
+                y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
               />
             )
           );
@@ -104,6 +111,7 @@ function Stage() {
             sprites.push(
               <ClearedSprite
                 key={`cleared-block-${blocksCleared.current}`}
+                texture={textures.blank}
                 tint={tetrominoColor[TetrominoType[type]]}
                 x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
                 y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
@@ -154,17 +162,15 @@ function Stage() {
           const tetrominoName = TetrominoType[row];
 
           sprites.push(
-            <Sprite
+            <pixiSprite
               alpha={row === TetrominoType.Ghost ? 0.25 : 1}
               height={GAME_PANEL.CHILD}
               key={`game-${colIndex}-${rowIndex}`}
-              position={[
-                GAME_PANEL.X + GAME_PANEL.CHILD * colIndex,
-                GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex,
-              ]}
-              texture={texture.blank}
+              texture={textures.blank}
               tint={tetrominoColor[tetrominoName]}
               width={GAME_PANEL.CHILD}
+              x={GAME_PANEL.X + GAME_PANEL.CHILD * colIndex}
+              y={GAME_PANEL.Y + GAME_PANEL.CHILD * rowIndex}
             />
           );
         });
@@ -179,17 +185,15 @@ function Stage() {
         const tetrominoName = TetrominoType[row];
 
         sprites.push(
-          <Sprite
+          <pixiSprite
             alpha={gameStates.gameOver ? 0.25 : 1}
             height={HOLD_PANEL.CHILD}
             key={`hold-${colIndex}-${rowIndex}`}
-            position={[
-              HOLD_PANEL.X + HOLD_PANEL.CHILD * colIndex,
-              HOLD_PANEL.Y + HOLD_PANEL.CHILD * rowIndex,
-            ]}
-            texture={texture.blank}
+            texture={textures.blank}
             tint={tetrominoColor[tetrominoName]}
             width={HOLD_PANEL.CHILD}
+            x={HOLD_PANEL.X + HOLD_PANEL.CHILD * colIndex}
+            y={HOLD_PANEL.Y + HOLD_PANEL.CHILD * rowIndex}
           />
         );
       });
@@ -206,17 +210,15 @@ function Stage() {
           const tetrominoName = TetrominoType[row];
 
           sprites.push(
-            <Sprite
+            <pixiSprite
               alpha={gameStates.gameOver ? 0.25 : 1}
               height={QUEUE_PANEL.CHILD}
               key={`queue-${spawnedIndex}-${colIndex}-${rowIndex}`}
-              position={[
-                QUEUE_PANEL.X + QUEUE_PANEL.CHILD * colIndex,
-                queuePanelYCoord + QUEUE_PANEL.CHILD * rowIndex,
-              ]}
-              texture={texture.blank}
+              texture={textures.blank}
               tint={tetrominoColor[tetrominoName]}
               width={QUEUE_PANEL.CHILD}
+              x={QUEUE_PANEL.X + QUEUE_PANEL.CHILD * colIndex}
+              y={queuePanelYCoord + QUEUE_PANEL.CHILD * rowIndex}
             />
           );
         });
@@ -226,34 +228,39 @@ function Stage() {
     });
 
     setGameSprites(sprites);
-  }, [gameStates, gameOptions]);
+  }, [gameStates, gameOptions, textures]);
 
   return (
-    <PixiStage
+    <Application
+      antialias={gameOptions.antialias}
+      backgroundColor={
+        theme === "light"
+          ? BASE_STYLE.LIGHT.SECONDARY
+          : BASE_STYLE.DARK.SECONDARY
+      }
       height={STAGE_SIZE}
-      options={{
-        antialias: gameOptions.antialias,
-        backgroundColor:
-          theme === "light"
-            ? BASE_STYLE.LIGHT.SECONDARY
-            : BASE_STYLE.DARK.SECONDARY,
-        hello: true, // Logs Pixi version & renderer type
-        powerPreference: gameOptions.powerPreference,
-      }}
+      hello
+      onInit={handleInit}
+      powerPreference={
+        gameOptions.powerPreference === "default"
+          ? undefined
+          : gameOptions.powerPreference
+      }
+      preference="webgpu"
       width={STAGE_SIZE}
     >
-      <Container position={stagePosition}>
+      <pixiContainer position={stagePosition}>
         <BorderGraphics />
         {gameSprites}
-      </Container>
+      </pixiContainer>
       {gameOptions.performanceDisplay ? <PerformanceTracker /> : null}
-    </PixiStage>
+    </Application>
   );
 }
 
 /**
  * Wraps the stage with the animation div
- * Pixi requires the Stage component & Pixi children to be returned separately
+ * Pixi requires the Application component & Pixi children to be returned separately
  */
 export default function StageWrapper() {
   const gameOptions = useGameStore((state) => state.gameOptions);

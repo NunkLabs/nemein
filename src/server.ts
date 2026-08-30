@@ -13,7 +13,7 @@ import { Socket } from "./websocket/Socket.js";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "Content-Security-Policy":
-    "default-src 'self'; connect-src 'self' ws: nemein.io *.nemein.io ; img-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "default-src 'self'; connect-src 'self' ws: nemein.io *.nemein.io ; img-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
   "Referrer-Policy": "strict-origin",
   Server: "nemein",

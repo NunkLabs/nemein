@@ -1,4 +1,4 @@
-import { Text, useTick } from "@pixi/react";
+import { useTick } from "@pixi/react";
 import { TextStyle } from "pixi.js";
 import { useMemo, useRef, useState } from "react";
 
@@ -61,11 +61,22 @@ export default function DamageSprite({
     scale: 1,
   });
 
+  const textStyle = useMemo(
+    () =>
+      new TextStyle({
+        align: "center",
+        fill: color,
+        fontSize: 35,
+        fontWeight: "bold",
+      }),
+    [color]
+  );
+
   /**
    * The animation progressing logic is the same as ClearedBlock
    * {@see ClearedBlock}
    */
-  useTick((_delta, ticker) => {
+  useTick((ticker) => {
     const renderTimeout = setTimeout(() => {
       if (time.current > ANIMATION_DURATION_S) {
         setTextProperties({
@@ -90,20 +101,14 @@ export default function DamageSprite({
   });
 
   return (
-    <Text
+    <pixiText
       alpha={textProperties.alpha}
       anchor={SPRITE_ANCHOR}
-      position={[baseProperties.x, baseProperties.y]}
       scale={textProperties.scale}
-      style={
-        new TextStyle({
-          align: "center",
-          fill: color,
-          fontSize: 35,
-          fontWeight: "bold",
-        })
-      }
+      style={textStyle}
       text={dmgDealt}
+      x={baseProperties.x}
+      y={baseProperties.y}
     />
   );
 }

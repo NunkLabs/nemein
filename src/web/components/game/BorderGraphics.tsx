@@ -1,5 +1,5 @@
-import { Graphics, type PixiRef } from "@pixi/react";
 import { useGameStore } from "libs/Store";
+import type { Graphics } from "pixi.js";
 import { useCallback } from "react";
 import {
   BASE_STYLE,
@@ -14,10 +14,10 @@ import {
 export default function BorderGraphics() {
   const gameTheme = useGameStore((state) => state.gameTheme);
   const draw = useCallback(
-    (panelGraphics: PixiRef<typeof Graphics>) => {
+    (panelGraphics: Graphics) => {
       panelGraphics.clear();
 
-      panelGraphics.lineStyle({
+      panelGraphics.setStrokeStyle({
         alignment: BORDER_STYLE.ALIGNMENT,
         color:
           gameTheme === "light"
@@ -26,14 +26,14 @@ export default function BorderGraphics() {
         width: BORDER_STYLE.WIDTH,
       });
 
-      panelGraphics.drawRect(
+      panelGraphics.rect(
         HOLD_PANEL.X,
         HOLD_PANEL.Y,
         HOLD_PANEL.WIDTH,
         HOLD_PANEL.HEIGHT
       );
 
-      panelGraphics.drawRect(
+      panelGraphics.rect(
         GAME_PANEL.X,
         GAME_PANEL.Y,
         GAME_PANEL.WIDTH,
@@ -45,16 +45,18 @@ export default function BorderGraphics() {
         queuePanelYCoord + QUEUE_PANEL.HEIGHT + STAGE_SPACER < STAGE_SIZE;
         queuePanelYCoord += QUEUE_PANEL.HEIGHT + STAGE_SPACER
       ) {
-        panelGraphics.drawRect(
+        panelGraphics.rect(
           QUEUE_PANEL.X,
           queuePanelYCoord,
           QUEUE_PANEL.WIDTH,
           QUEUE_PANEL.HEIGHT
         );
       }
+
+      panelGraphics.stroke();
     },
     [gameTheme]
   );
 
-  return <Graphics draw={draw} />;
+  return <pixiGraphics draw={draw} />;
 }

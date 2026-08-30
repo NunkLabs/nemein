@@ -8,6 +8,9 @@ const ControlPanel = lazy(() => import("components/panels/Control"));
 const Stage = lazy(() => import("components/game/Stage"));
 const StartPanel = lazy(() => import("components/panels/Start"));
 
+/* Module scope so the React Compiler can optimize the effect that calls it */
+const loadAnimationBundle = () => import("libs/Animation");
+
 const ESCAPE_KEY = "Escape";
 const VALID_KEYS = [
   /* Left */
@@ -128,7 +131,7 @@ export default function Nemein() {
       return;
     }
 
-    import("libs/Animation").then((res) => {
+    loadAnimationBundle().then((res) => {
       setFeatureBundle(res.default);
 
       updateGameLoadStates({ featureBundle: true });

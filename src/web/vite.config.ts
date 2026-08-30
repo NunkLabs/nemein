@@ -11,7 +11,7 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: path.resolve(webRoot, "../../dist/web"),
   },
-  plugins: [react(), tailwindcss()],
+  plugins: [react({ compiler: { logDiagnostics: true } }), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(webRoot),

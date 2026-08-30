@@ -40,7 +40,7 @@ export const BASE_STYLE = {
 };
 
 export const BORDER_STYLE = {
-  ALIGNMENT: 1,
+  ALIGNMENT: 0,
   WIDTH: 4,
 };
 

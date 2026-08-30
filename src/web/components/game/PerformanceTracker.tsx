@@ -1,4 +1,4 @@
-import { Container, useTick } from "@pixi/react";
+import { useTick } from "@pixi/react";
 
 import { useGameStore } from "libs/Store";
 
@@ -7,12 +7,12 @@ export default function PerformanceTracker() {
     (state) => state.updateGamePerformance
   );
 
-  useTick((_delta, ticker) => {
+  useTick((ticker) => {
     updateGamePerformance({
       frameRate: Math.floor(ticker.FPS),
       frameTime: Number.parseFloat(ticker.deltaMS.toFixed(2)),
     });
   });
 
-  return <Container />;
+  return <pixiContainer />;
 }
