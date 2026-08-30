@@ -1,3 +1,6 @@
+import "pixi.js/app";
+import "pixi.js/graphics";
+import "pixi.js/text";
 import { extend } from "@pixi/react";
 import {
   Assets,

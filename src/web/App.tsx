@@ -1,11 +1,12 @@
+import { loadStage } from "components/game/StageLoader";
 import { GameSocket, Opcodes } from "libs/Socket";
 import { useGameStore } from "libs/Store";
 import type { FeatureBundle } from "motion/react";
 import { LazyMotion } from "motion/react";
+import type { ComponentType } from "react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 
 const ControlPanel = lazy(() => import("components/panels/Control"));
-const Stage = lazy(() => import("components/game/Stage"));
 const StartPanel = lazy(() => import("components/panels/Start"));
 
 /* Module scope so the React Compiler can optimize the effect that calls it */
@@ -66,6 +67,8 @@ export default function Nemein() {
   );
   /* Held in state so callbacks see the socket the effect owns */
   const [gameSocket, setGameSocket] = useState<GameSocket | null>(null);
+  /* Resolved by hand instead of through React.lazy: a Suspense boundary that */
+  const [Stage, setStage] = useState<ComponentType | null>(null);
 
   const startGame = useCallback(() => {
     if (!gameSocket) {
@@ -137,6 +140,19 @@ export default function Nemein() {
       updateGameLoadStates({ featureBundle: true });
     });
   }, [gameLoadStates.featureBundle, updateGameLoadStates]);
+
+  useEffect(() => {
+    /* Mounts the stage only once the player asks to play */
+    if (!gameLoadStates.gameRequest) {
+      return;
+    }
+
+    loadStage()
+      .then((res) => setStage(() => res.default))
+      .catch((error: unknown) => {
+        console.error("[App]: Failed to load the game stage", error);
+      });
+  }, [gameLoadStates.gameRequest]);
 
   useEffect(() => {
     /* Initializes and listens for socket events */
@@ -222,7 +238,7 @@ export default function Nemein() {
         <LazyMotion features={featureBundle} strict>
           {gameLoadStates.featureBundle ? (
             <Suspense fallback={null}>
-              <Stage />
+              {Stage ? <Stage /> : null}
               <StartPanel startGame={startGame} />
               <ControlPanel startGame={startGame} toggleGame={toggleGame} />
             </Suspense>

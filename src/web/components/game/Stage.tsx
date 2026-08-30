@@ -247,6 +247,7 @@ function Stage() {
           : gameOptions.powerPreference
       }
       preference="webgpu"
+      skipExtensionImports
       width={STAGE_SIZE}
     >
       <pixiContainer position={stagePosition}>

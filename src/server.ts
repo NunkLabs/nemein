@@ -72,8 +72,10 @@ export function createServer(options: ServerOptions = {}): Server {
 
   const serve = webRoot
     ? sirv(webRoot, {
+        brotli: true,
         dev: process.env.NODE_ENV === "development",
         dotfiles: false,
+        gzip: true,
         setHeaders: (res: ServerResponse, pathname: string) => {
           if (pathname === "/" || pathname.endsWith(".html")) {
             res.setHeader("Cache-Control", "no-cache, must-revalidate");

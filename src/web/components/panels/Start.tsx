@@ -1,3 +1,4 @@
+import { preloadStage } from "components/game/StageLoader";
 import { buttonVariants } from "components/ui/Button";
 import { useGameStore } from "libs/Store";
 import { AnimatePresence, m } from "motion/react";
@@ -118,6 +119,9 @@ export default function StartPanel({ startGame }: { startGame: () => void }) {
                 initial={{ opacity: 0, y: -10 }}
                 key="start-panel-start"
                 onClick={handleStartClick}
+                onFocus={preloadStage}
+                onPointerDown={preloadStage}
+                onPointerEnter={preloadStage}
                 type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
