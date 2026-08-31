@@ -3,5 +3,13 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     open-pull-requests-limit: 10
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "quarterly"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          ["version-update:semver-minor", "version-update:semver-patch"]

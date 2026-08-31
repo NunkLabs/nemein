@@ -1,4 +1,4 @@
-# TetriBASS Server
+# Nemein
 
 This repository contains the game server and web client in one unified setup. The web client previously lived in [NunkLabs/nemein-client](https://github.com/NunkLabs/nemein-client); it now lives in `src/web` and shares this repository's package management, build, and deployment workflow.
 
